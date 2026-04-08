@@ -1,0 +1,35 @@
+version: '3.9'
+
+services:
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: trackr-api
+    ports:
+      - '5000:5000'
+    environment:
+      - NODE_ENV=production
+    env_file:
+      - ./api/.env
+    restart: unless-stopped
+    networks:
+      - trackr-network
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: trackr-client
+    ports:
+      - '80:80'
+      - '443:443'
+    depends_on:
+      - api
+    restart: unless-stopped
+    networks:
+      - trackr-network
+
+networks:
+  trackr-network:
+    driver: bridge

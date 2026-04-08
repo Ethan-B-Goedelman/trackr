@@ -1,0 +1,62 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply bg-gradient-to-b from-yellow-50 via-white to-white min-h-screen;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Remove default MUI focus outlines — we use Tailwind's ring */
+  .MuiOutlinedInput-notchedOutline {
+    display: none !important;
+  }
+}
+
+@layer components {
+  /* ── Shared input style matching the Figma design ── */
+  .trackr-input {
+    @apply w-full px-4 py-4 bg-white/80 backdrop-blur-sm border border-gray-200
+           rounded-2xl focus:outline-none focus:ring-2 focus:ring-yellow-300
+           focus:border-transparent transition-all duration-200 placeholder:text-gray-400
+           text-gray-800 text-base;
+  }
+
+  /* ── Primary button — yellow gradient ── */
+  .btn-primary {
+    @apply w-full py-4 bg-gradient-to-r from-yellow-300 to-yellow-400
+           text-gray-800 font-semibold rounded-2xl shadow-md
+           hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]
+           transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed
+           disabled:hover:scale-100;
+  }
+
+  /* ── Secondary button — glass white ── */
+  .btn-secondary {
+    @apply w-full py-4 bg-white/80 backdrop-blur-sm border border-gray-200
+           text-gray-700 font-medium rounded-2xl hover:bg-white hover:shadow-md
+           hover:scale-[1.02] active:scale-[0.98] transition-all duration-200;
+  }
+
+  /* ── Glass card ── */
+  .glass-card {
+    @apply bg-white/80 backdrop-blur-sm rounded-3xl shadow-card border border-gray-100;
+  }
+}
+
+/* Hide scrollbar for filter chips */
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Smooth page transitions */
+.page-enter { animation: fadeSlideUp 0.25s ease both; }
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
