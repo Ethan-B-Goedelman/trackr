@@ -113,6 +113,8 @@ export default function Contacts() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
 
+  useEffect(() => { document.title = 'Contacts — Trackr'; }, []);
+
   const fetchContacts = useCallback(async (page = 1) => {
     setSearchLoading(true);
     try {
@@ -121,7 +123,8 @@ export default function Contacts() {
       const res = await api.get(`/contacts?${params}`);
       setContacts(res.data.contacts);
       setPagination(res.data.pagination);
-    } catch {
+    } catch (err) {
+      console.error('Failed to load contacts', err);
       setError('Failed to load contacts');
     } finally {
       setLoading(false);
@@ -163,7 +166,7 @@ export default function Contacts() {
       {/* Header */}
       <div className="pt-2 flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-semibold text-gray-800">Contacts</h2>
+          <h1 className="text-3xl font-semibold text-gray-800">Contacts</h1>
           <p className="text-gray-500 mt-1 text-sm">{pagination.total} total</p>
         </div>
         <button

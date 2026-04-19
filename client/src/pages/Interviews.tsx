@@ -14,12 +14,15 @@ export default function Interviews() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
 
+  useEffect(() => { document.title = 'Interviews — Trackr'; }, []);
+
   const fetchInterviews = useCallback(async () => {
     setLoading(true);
     try {
       const res = await api.get('/interviews?limit=200');
       setInterviews(res.data.interviews);
-    } catch {
+    } catch (err) {
+      console.error('Failed to load interviews', err);
       setError('Failed to load interviews');
     } finally {
       setLoading(false);
@@ -64,7 +67,7 @@ export default function Interviews() {
       {/* Header */}
       <div className="pt-2 flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-semibold text-gray-800">Interviews</h2>
+          <h1 className="text-3xl font-semibold text-gray-800">Interviews</h1>
           <p className="text-gray-500 mt-1 text-sm">{interviews.length} total</p>
         </div>
         <button
@@ -147,9 +150,10 @@ export default function Interviews() {
       {/* Floating add button (mobile) */}
       <button
         onClick={() => { setEditingInterview(null); setFormOpen(true); }}
+        aria-label="Schedule new interview"
         className="fixed bottom-24 right-6 w-14 h-14 bg-gradient-to-br from-yellow-300 to-yellow-400 rounded-full shadow-float flex items-center justify-center hover:shadow-xl hover:scale-110 active:scale-95 transition-all duration-200 md:hidden z-20"
       >
-        <svg className="w-7 h-7 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-7 h-7 text-gray-800" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
         </svg>
       </button>

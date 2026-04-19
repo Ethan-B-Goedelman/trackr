@@ -27,12 +27,12 @@ export default function Register() {
       <div className="min-h-screen bg-gradient-to-b from-yellow-100 via-yellow-50 to-white flex flex-col items-center justify-center px-8 py-12">
         <div className="w-full max-w-sm text-center space-y-6 page-enter">
           <div className="w-20 h-20 mx-auto bg-gradient-to-br from-green-300 to-green-400 rounded-3xl shadow-lg flex items-center justify-center">
-            <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-10 h-10 text-white" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
             </svg>
           </div>
           <div>
-            <h2 className="text-2xl font-semibold text-gray-800 mb-2">Check your email</h2>
+            <h1 className="text-2xl font-semibold text-gray-800 mb-2">Check your email</h1>
             <p className="text-gray-500 text-sm leading-relaxed">
               We've sent a verification link to your inbox. Click it to activate your account.
             </p>
@@ -56,7 +56,7 @@ export default function Register() {
         </div>
 
         {serverError && (
-          <div className="bg-red-50 border border-red-200 rounded-2xl px-4 py-3 text-sm text-red-600">
+          <div role="alert" className="bg-red-50 border border-red-200 rounded-2xl px-4 py-3 text-sm text-red-600">
             {serverError}
           </div>
         )}
@@ -64,29 +64,35 @@ export default function Register() {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-3" noValidate>
           <div className="grid grid-cols-2 gap-3">
             <div>
+              <label htmlFor="reg-firstName" className="sr-only">First name</label>
               <input
+                id="reg-firstName"
                 type="text"
                 placeholder="First name"
                 autoComplete="given-name"
                 {...register('firstName', { required: 'Required' })}
                 className="trackr-input"
               />
-              {errors.firstName && <p className="text-xs text-red-500 mt-1 px-1">{errors.firstName.message}</p>}
+              {errors.firstName && <p role="alert" className="text-xs text-red-500 mt-1 px-1">{errors.firstName.message}</p>}
             </div>
             <div>
+              <label htmlFor="reg-lastName" className="sr-only">Last name</label>
               <input
+                id="reg-lastName"
                 type="text"
                 placeholder="Last name"
                 autoComplete="family-name"
                 {...register('lastName', { required: 'Required' })}
                 className="trackr-input"
               />
-              {errors.lastName && <p className="text-xs text-red-500 mt-1 px-1">{errors.lastName.message}</p>}
+              {errors.lastName && <p role="alert" className="text-xs text-red-500 mt-1 px-1">{errors.lastName.message}</p>}
             </div>
           </div>
 
           <div>
+            <label htmlFor="reg-email" className="sr-only">Email address</label>
             <input
+              id="reg-email"
               type="email"
               placeholder="Email"
               autoComplete="email"
@@ -96,11 +102,13 @@ export default function Register() {
               })}
               className="trackr-input"
             />
-            {errors.email && <p className="text-xs text-red-500 mt-1 px-1">{errors.email.message}</p>}
+            {errors.email && <p role="alert" className="text-xs text-red-500 mt-1 px-1">{errors.email.message}</p>}
           </div>
 
           <div className="relative">
+            <label htmlFor="reg-password" className="sr-only">Password (minimum 8 characters)</label>
             <input
+              id="reg-password"
               type={showPassword ? 'text' : 'password'}
               placeholder="Password (min. 8 characters)"
               autoComplete="new-password"
@@ -113,18 +121,21 @@ export default function Register() {
             <button
               type="button"
               onClick={() => setShowPassword((s) => !s)}
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
               className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                   d="M15 12a3 3 0 11-6 0 3 3 0 016 0zM2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
               </svg>
             </button>
-            {errors.password && <p className="text-xs text-red-500 mt-1 px-1">{errors.password.message}</p>}
+            {errors.password && <p role="alert" className="text-xs text-red-500 mt-1 px-1">{errors.password.message}</p>}
           </div>
 
           <div>
+            <label htmlFor="reg-confirmPassword" className="sr-only">Confirm password</label>
             <input
+              id="reg-confirmPassword"
               type="password"
               placeholder="Confirm password"
               autoComplete="new-password"
@@ -134,12 +145,12 @@ export default function Register() {
               })}
               className="trackr-input"
             />
-            {errors.confirmPassword && <p className="text-xs text-red-500 mt-1 px-1">{errors.confirmPassword.message}</p>}
+            {errors.confirmPassword && <p role="alert" className="text-xs text-red-500 mt-1 px-1">{errors.confirmPassword.message}</p>}
           </div>
 
           <button type="submit" disabled={isSubmitting} className="btn-primary mt-2 flex items-center justify-center gap-2">
             {isSubmitting ? (
-              <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+              <svg className="animate-spin w-4 h-4" aria-hidden="true" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
               </svg>

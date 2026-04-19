@@ -1,0 +1,9 @@
+User-agent: *
+Disallow: /dashboard
+Disallow: /applications
+Disallow: /interviews
+Disallow: /calendar
+Disallow: /contacts
+Allow: /login
+Allow: /register
+Allow: /forgot-password

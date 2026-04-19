@@ -17,7 +17,7 @@ export default function Layout() {
         {/* Top bar (mobile only) */}
         <TopBar onMenuClick={() => setSidebarOpen(true)} />
 
-        <main className="flex-1 page-enter">
+        <main id="main-content" className="flex-1 page-enter" tabIndex={-1}>
           <Outlet />
         </main>
 

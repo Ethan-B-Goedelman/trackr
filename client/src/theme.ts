@@ -4,12 +4,13 @@ const theme = createTheme({
   palette: {
     mode: 'light',
     primary: {
-      main: '#1976d2',
-      light: '#42a5f5',
-      dark: '#1565c0',
+      main: '#fbbf24',
+      light: '#fcd34d',
+      dark: '#d97706',
+      contrastText: '#1a1a1a',
     },
     secondary: {
-      main: '#7c3aed',
+      main: '#d97706',
     },
     background: {
       default: '#f5f7fa',

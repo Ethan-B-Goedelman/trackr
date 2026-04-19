@@ -15,5 +15,16 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'mui-vendor': ['@mui/material', '@emotion/react', '@emotion/styled'],
+          'chart-vendor': ['recharts'],
+          'form-vendor': ['react-hook-form'],
+          'date-vendor': ['dayjs'],
+        },
+      },
+    },
   },
 });

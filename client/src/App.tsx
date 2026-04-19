@@ -1,22 +1,22 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Layout from './components/Layout/Layout';
 
-// Auth pages
-import Login from './pages/auth/Login';
-import Register from './pages/auth/Register';
-import VerifyEmail from './pages/auth/VerifyEmail';
-import ForgotPassword from './pages/auth/ForgotPassword';
-import ResetPassword from './pages/auth/ResetPassword';
+// Auth pages — lazy loaded
+const Login = lazy(() => import('./pages/auth/Login'));
+const Register = lazy(() => import('./pages/auth/Register'));
+const VerifyEmail = lazy(() => import('./pages/auth/VerifyEmail'));
+const ForgotPassword = lazy(() => import('./pages/auth/ForgotPassword'));
+const ResetPassword = lazy(() => import('./pages/auth/ResetPassword'));
 
-// App pages
-import Dashboard from './pages/Dashboard';
-import Applications from './pages/Applications';
-import Interviews from './pages/Interviews';
-import CalendarPage from './pages/Calendar';
-import Contacts from './pages/Contacts';
+// App pages — lazy loaded
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const Applications = lazy(() => import('./pages/Applications'));
+const Interviews = lazy(() => import('./pages/Interviews'));
+const CalendarPage = lazy(() => import('./pages/Calendar'));
+const Contacts = lazy(() => import('./pages/Contacts'));
 
 function LoadingScreen() {
   return (
@@ -39,26 +39,28 @@ const PublicRoute = ({ children }) => {
 };
 
 const AppRoutes = () => (
-  <Routes>
-    {/* Public */}
-    <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-    <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
-    <Route path="/verify-email" element={<VerifyEmail />} />
-    <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
-    <Route path="/reset-password" element={<PublicRoute><ResetPassword /></PublicRoute>} />
+  <Suspense fallback={<LoadingScreen />}>
+    <Routes>
+      {/* Public */}
+      <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+      <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
+      <Route path="/verify-email" element={<VerifyEmail />} />
+      <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
+      <Route path="/reset-password" element={<PublicRoute><ResetPassword /></PublicRoute>} />
 
-    {/* Protected */}
-    <Route path="/" element={<PrivateRoute><Layout /></PrivateRoute>}>
-      <Route index element={<Navigate to="/dashboard" replace />} />
-      <Route path="dashboard" element={<Dashboard />} />
-      <Route path="applications" element={<Applications />} />
-      <Route path="interviews" element={<Interviews />} />
-      <Route path="calendar" element={<CalendarPage />} />
-      <Route path="contacts" element={<Contacts />} />
-    </Route>
+      {/* Protected */}
+      <Route path="/" element={<PrivateRoute><Layout /></PrivateRoute>}>
+        <Route index element={<Navigate to="/dashboard" replace />} />
+        <Route path="dashboard" element={<Dashboard />} />
+        <Route path="applications" element={<Applications />} />
+        <Route path="interviews" element={<Interviews />} />
+        <Route path="calendar" element={<CalendarPage />} />
+        <Route path="contacts" element={<Contacts />} />
+      </Route>
 
-    <Route path="*" element={<Navigate to="/dashboard" replace />} />
-  </Routes>
+      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+    </Routes>
+  </Suspense>
 );
 
 export default function App() {

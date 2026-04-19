@@ -5,6 +5,9 @@ import api from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import StatusChip from '../components/Applications/StatusChip';
 
+// Update browser tab title for this page
+const PAGE_TITLE = 'Dashboard — Trackr';
+
 function StatCard({ gradient, iconBg, icon, value, label }) {
   return (
     <div className={`${gradient} rounded-3xl p-4 shadow-card`}>
@@ -26,6 +29,8 @@ export default function Dashboard() {
 
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+
+  useEffect(() => { document.title = PAGE_TITLE; }, []);
 
   useEffect(() => {
     Promise.all([
@@ -59,7 +64,7 @@ export default function Dashboard() {
 
       {/* Header */}
       <div className="pt-2">
-        <h2 className="text-3xl font-semibold text-gray-800">{greeting} 👋</h2>
+        <h1 className="text-3xl font-semibold text-gray-800">{greeting} 👋</h1>
         <p className="text-gray-500 mt-1 text-sm">Here's your application progress</p>
       </div>
 
@@ -74,7 +79,7 @@ export default function Dashboard() {
         <StatCard
           gradient="bg-gradient-to-br from-yellow-100 to-yellow-200"
           icon={
-            <svg className="w-5 h-5 text-yellow-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-yellow-700" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                 d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
             </svg>
@@ -85,7 +90,7 @@ export default function Dashboard() {
         <StatCard
           gradient="bg-gradient-to-br from-pink-100 to-pink-200"
           icon={
-            <svg className="w-5 h-5 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-pink-600" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                 d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
@@ -96,7 +101,7 @@ export default function Dashboard() {
         <StatCard
           gradient="bg-gradient-to-br from-blue-100 to-blue-200"
           icon={
-            <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-blue-600" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                 d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
@@ -171,7 +176,7 @@ export default function Dashboard() {
                   <StatusChip status={app.status} />
                 </div>
                 <p className="text-xs text-gray-400">
-                  {app.dateApplied ? new Date(app.dateApplied).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}
+                  {app.dateApplied ? new Date(app.dateApplied).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}
                 </p>
               </Link>
             ))
