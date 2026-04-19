@@ -1,10 +1,22 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import api from '../services/api';
+import type { User } from '../types';
 
-const AuthContext = createContext(null);
+interface FullAuthContextType {
+  user: User | null;
+  loading: boolean;
+  login: (email: string, password: string) => Promise<User>;
+  register: (data: Record<string, unknown>) => Promise<unknown>;
+  logout: () => void;
+  forgotPassword: (email: string) => Promise<unknown>;
+  resetPassword: (token: string, password: string) => Promise<unknown>;
+  verifyEmail: (token: string) => Promise<User>;
+}
 
-export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(() => {
+const AuthContext = createContext<FullAuthContextType | null>(null);
+
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  const [user, setUser] = useState<User | null>(() => {
     try {
       const stored = localStorage.getItem('trackr_user');
       return stored ? JSON.parse(stored) : null;

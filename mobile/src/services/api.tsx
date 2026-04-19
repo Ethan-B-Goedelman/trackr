@@ -2,7 +2,7 @@ import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 
 // Update this to your deployed API URL or local IP for device testing
-const BASE_URL = 'http://137.184.237.129:5000/api';
+const BASE_URL = 'http://137.184.237.129/api';
 
 const api = axios.create({
   baseURL: BASE_URL,

@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 
 const api = axios.create({
   baseURL: '/api',
@@ -6,7 +6,7 @@ const api = axios.create({
 });
 
 // Attach JWT to every request
-api.interceptors.request.use((config) => {
+api.interceptors.request.use((config: InternalAxiosRequestConfig): InternalAxiosRequestConfig => {
   const token = localStorage.getItem('trackr_token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -16,7 +16,7 @@ api.interceptors.request.use((config) => {
 
 // Global response error handler
 api.interceptors.response.use(
-  (response) => response,
+  (response: AxiosResponse): AxiosResponse => response,
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem('trackr_token');

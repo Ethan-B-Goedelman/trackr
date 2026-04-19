@@ -22,7 +22,7 @@ export default function ApplicationsScreen({ navigation }) {
 
   const fetchApplications = async () => {
     try {
-      const params = new URLSearchParams({ limit: 100 });
+      const params = new URLSearchParams({ limit: '100' });
       if (filter !== 'All') params.set('status', filter);
       const res = await api.get(`/applications?${params}`);
       setApplications(res.data.applications);
@@ -41,23 +41,22 @@ export default function ApplicationsScreen({ navigation }) {
 
   const onRefresh = () => { setRefreshing(true); fetchApplications(); };
 
+  const handleDelete = async (id) => {
+    try {
+      await api.delete(`/applications/${id}`);
+      setApplications((prev) => prev.filter((a) => a._id !== id));
+    } catch {
+      // silently fail — user can refresh
+    }
+  };
+
   const ListHeader = () => (
     <View style={styles.listHeader}>
-      {/* Page header */}
       <View style={styles.pageHeader}>
         <View>
           <Text style={styles.pageTitle}>Applications</Text>
           <Text style={styles.pageSubtitle}>{applications.length} total</Text>
         </View>
-        <TouchableOpacity
-          style={styles.addBtnSmall}
-          onPress={() => navigation.navigate('AddApplication')}
-          activeOpacity={0.8}
-        >
-          <LinearGradient colors={Gradients.primaryBtn} style={styles.addBtnGradient}>
-            <Ionicons name="add" size={22} color={Colors.textPrimary} />
-          </LinearGradient>
-        </TouchableOpacity>
       </View>
 
       {/* Filter chips */}
@@ -104,10 +103,13 @@ export default function ApplicationsScreen({ navigation }) {
         data={applications}
         keyExtractor={(item) => item._id}
         renderItem={({ item }) => (
-          <ApplicationCard
-            application={item}
-            onPress={() => {}}
-          />
+          <View style={styles.cardWrapper}>
+            <ApplicationCard
+              application={item}
+              onPress={() => navigation.navigate('EditApplication', { application: item })}
+              onDelete={() => handleDelete(item._id)}
+            />
+          </View>
         )}
         ListHeaderComponent={<ListHeader />}
         refreshControl={
@@ -128,7 +130,7 @@ export default function ApplicationsScreen({ navigation }) {
         }
       />
 
-      {/* FAB */}
+      {/* FAB — single add button */}
       <TouchableOpacity
         style={styles.fabWrap}
         onPress={() => navigation.navigate('AddApplication')}
@@ -147,7 +149,6 @@ const styles = StyleSheet.create({
   centered: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: Colors.bgWarm },
   list: { paddingBottom: 100 },
 
-  // List header
   listHeader: { paddingTop: 16 },
   pageHeader: {
     flexDirection: 'row',
@@ -159,11 +160,6 @@ const styles = StyleSheet.create({
   pageTitle: { fontSize: 28, fontWeight: '800', color: Colors.textPrimary, letterSpacing: -0.5 },
   pageSubtitle: { fontSize: 13, color: Colors.textSecondary, marginTop: 2 },
 
-  // Small add button in header
-  addBtnSmall: { borderRadius: Radius.md, ...Shadows.card },
-  addBtnGradient: { width: 44, height: 44, borderRadius: Radius.md, justifyContent: 'center', alignItems: 'center' },
-
-  // Filter chips
   chipList: { marginBottom: 16 },
   chipListContent: { paddingHorizontal: 20, gap: 8 },
   chip: {
@@ -179,7 +175,6 @@ const styles = StyleSheet.create({
   chipText: { fontSize: 13, fontWeight: '600', color: Colors.textSecondary },
   chipTextActive: { color: Colors.textPrimary },
 
-  // Error
   errorBanner: {
     marginHorizontal: 20,
     marginBottom: 12,
@@ -189,17 +184,13 @@ const styles = StyleSheet.create({
   },
   errorText: { color: Colors.error, fontSize: 13 },
 
-  // Cards padding
-  // (ApplicationCard handles its own padding, FlatList needs horizontal padding)
-  // Pass via contentContainerStyle padding in FlatList or wrap cards
+  cardWrapper: { paddingHorizontal: 20 },
 
-  // Empty
   emptyWrap: { alignItems: 'center', paddingTop: 64, paddingHorizontal: 32 },
   emptyEmoji: { fontSize: 48, marginBottom: 12 },
   emptyTitle: { fontSize: 17, fontWeight: '700', color: Colors.textPrimary, marginBottom: 6 },
   emptyHint: { fontSize: 14, color: Colors.textSecondary, textAlign: 'center' },
 
-  // FAB
   fabWrap: {
     position: 'absolute',
     bottom: 28,

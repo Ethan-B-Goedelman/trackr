@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find /c/Users/Ethan/Trackr/client/src -name \"*.jsx\" -exec bash -c 'mv \"$1\" \"${1%.jsx}.tsx\"' _ {} \\\\;)",
+      "Bash(find /c/Users/Ethan/Trackr/client/src -name \"*.js\" -exec bash -c 'mv \"$1\" \"${1%.js}.ts\"' _ {} \\\\;)",
+      "Bash(find /c/Users/Ethan/Trackr/mobile/src -name \"*.js\" -exec bash -c 'mv \"$1\" \"${1%.js}.tsx\"' _ {} \\\\;)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)"
+    ]
+  }
+}

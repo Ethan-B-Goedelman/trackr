@@ -9,15 +9,14 @@ import { useAuth } from '../context/AuthContext';
 import LoginScreen from '../screens/LoginScreen';
 import ApplicationsScreen from '../screens/ApplicationsScreen';
 import AddApplicationScreen from '../screens/AddApplicationScreen';
+import EditApplicationScreen from '../screens/EditApplicationScreen';
 import SearchScreen from '../screens/SearchScreen';
-import { Colors, Gradients, Radius, Shadows } from '../theme/colors';
-import { LinearGradient } from 'expo-linear-gradient';
-import { TouchableOpacity } from 'react-native';
+import ProfileScreen from '../screens/ProfileScreen';
+import { Colors, Radius, Shadows } from '../theme/colors';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
-// Custom tab bar icon with yellow active indicator dot
 function TabIcon({ name, focused, color }) {
   return (
     <View style={tabStyles.iconWrap}>
@@ -56,6 +55,7 @@ function AppsTabs() {
           const icons = {
             Applications: 'briefcase',
             Search: 'search',
+            Profile: 'person',
           };
           return <TabIcon name={icons[route.name]} focused={focused} color={color} />;
         },
@@ -63,6 +63,7 @@ function AppsTabs() {
     >
       <Tab.Screen name="Applications" component={ApplicationsScreen} />
       <Tab.Screen name="Search" component={SearchScreen} />
+      <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );
 }
@@ -91,14 +92,22 @@ export default function AppNavigator() {
                 headerShown: true,
                 title: 'New Application',
                 presentation: 'modal',
-                headerStyle: {
-                  backgroundColor: Colors.bgWarm,
-                },
-                headerTitleStyle: {
-                  fontSize: 17,
-                  fontWeight: '700',
-                  color: Colors.textPrimary,
-                },
+                headerStyle: { backgroundColor: Colors.bgWarm },
+                headerTitleStyle: { fontSize: 17, fontWeight: '700', color: Colors.textPrimary },
+                headerTintColor: Colors.yellowDark,
+                headerShadowVisible: false,
+                headerBackTitle: 'Back',
+              }}
+            />
+            <Stack.Screen
+              name="EditApplication"
+              component={EditApplicationScreen}
+              options={{
+                headerShown: true,
+                title: 'Edit Application',
+                presentation: 'modal',
+                headerStyle: { backgroundColor: Colors.bgWarm },
+                headerTitleStyle: { fontSize: 17, fontWeight: '700', color: Colors.textPrimary },
                 headerTintColor: Colors.yellowDark,
                 headerShadowVisible: false,
                 headerBackTitle: 'Back',

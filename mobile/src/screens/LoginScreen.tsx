@@ -6,6 +6,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
+import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
 import { Colors, Gradients, Radius, Shadows } from '../theme/colors';
 
@@ -47,10 +48,10 @@ export default function LoginScreen({ navigation }) {
           {/* Logo */}
           <View style={styles.logoSection}>
             <LinearGradient colors={Gradients.logo} style={styles.logoCard}>
-              <Text style={styles.logoLetter}>T</Text>
+              <Ionicons name="document-text" size={36} color="#fff" />
             </LinearGradient>
             <Text style={styles.appName}>Trackr</Text>
-            <Text style={styles.tagline}>Your job search, organized.</Text>
+            <Text style={styles.tagline}>Track your dream job journey</Text>
           </View>
 
           {/* Card */}
@@ -147,7 +148,6 @@ const styles = StyleSheet.create({
     marginBottom: 14,
     ...Shadows.float,
   },
-  logoLetter: { fontSize: 36, fontWeight: '800', color: '#fff' },
   appName: { fontSize: 30, fontWeight: '800', color: Colors.textPrimary, letterSpacing: -0.5 },
   tagline: { fontSize: 14, color: Colors.textSecondary, marginTop: 4 },
 

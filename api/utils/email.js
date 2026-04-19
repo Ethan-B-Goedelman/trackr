@@ -1,29 +1,19 @@
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 
-const createTransporter = () => {
-  return nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: parseInt(process.env.SMTP_PORT) || 587,
-    secure: process.env.SMTP_SECURE === 'true',
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-    },
-  });
-};
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+const FROM_ADDRESS = process.env.EMAIL_FROM || 'Trackr <no-reply@trackr.app>';
 
 const sendEmail = async ({ to, subject, html }) => {
-  const transporter = createTransporter();
-
-  const mailOptions = {
-    from: process.env.EMAIL_FROM || '"Trackr" <no-reply@trackr.app>',
+  const { data, error } = await resend.emails.send({
+    from: FROM_ADDRESS,
     to,
     subject,
     html,
-  };
+  });
 
-  const info = await transporter.sendMail(mailOptions);
-  return info;
+  if (error) throw new Error(error.message);
+  return data;
 };
 
 const sendVerificationEmail = async (user, token) => {
@@ -34,11 +24,11 @@ const sendVerificationEmail = async (user, token) => {
     subject: 'Verify your Trackr account',
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #1976d2;">Welcome to Trackr, ${user.firstName}!</h2>
+        <h2 style="color: #f59e0b;">Welcome to Trackr, ${user.firstName}!</h2>
         <p>Thanks for signing up. Please verify your email address to get started.</p>
         <a href="${verifyUrl}"
-           style="display: inline-block; padding: 12px 24px; background-color: #1976d2;
-                  color: white; text-decoration: none; border-radius: 4px; margin: 16px 0;">
+           style="display: inline-block; padding: 12px 24px; background-color: #fbbf24;
+                  color: #1c1c1e; text-decoration: none; border-radius: 12px; margin: 16px 0; font-weight: 700;">
           Verify Email
         </a>
         <p style="color: #666; font-size: 14px;">
@@ -61,11 +51,11 @@ const sendPasswordResetEmail = async (user, token) => {
     subject: 'Reset your Trackr password',
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #1976d2;">Password Reset Request</h2>
+        <h2 style="color: #f59e0b;">Password Reset Request</h2>
         <p>Hi ${user.firstName}, we received a request to reset your password.</p>
         <a href="${resetUrl}"
-           style="display: inline-block; padding: 12px 24px; background-color: #1976d2;
-                  color: white; text-decoration: none; border-radius: 4px; margin: 16px 0;">
+           style="display: inline-block; padding: 12px 24px; background-color: #fbbf24;
+                  color: #1c1c1e; text-decoration: none; border-radius: 12px; margin: 16px 0; font-weight: 700;">
           Reset Password
         </a>
         <p style="color: #666; font-size: 14px;">

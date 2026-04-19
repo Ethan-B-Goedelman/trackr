@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import { Colors, Radius, Shadows } from '../theme/colors';
@@ -16,7 +17,7 @@ const STATUS_STYLES = {
   'Rejected':     { bg: '#f3f4f6', text: '#6b7280', dot: '#9ca3af' },
 };
 
-export default function ApplicationCard({ application, onPress }) {
+export default function ApplicationCard({ application, onPress, onDelete }) {
   const { company, role, status, location, salaryMin, salaryMax, dateApplied } = application;
   const s = STATUS_STYLES[status] ?? STATUS_STYLES['Applied'];
 
@@ -25,11 +26,21 @@ export default function ApplicationCard({ application, onPress }) {
       ? [salaryMin, salaryMax].filter(Boolean).map((v) => `$${(v / 1000).toFixed(0)}k`).join(' – ')
       : null;
 
+  const handleDelete = () => {
+    Alert.alert(
+      'Delete Application',
+      `Remove ${company} from your applications?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Delete', style: 'destructive', onPress: onDelete },
+      ]
+    );
+  };
+
   return (
-    <View style={styles.card}>
+    <TouchableOpacity onPress={onPress} activeOpacity={0.75} style={styles.card}>
       {/* Top row */}
       <View style={styles.topRow}>
-        {/* Company initial avatar */}
         <View style={[styles.avatar, { backgroundColor: s.bg }]}>
           <Text style={[styles.avatarLetter, { color: s.text }]}>
             {company ? company[0].toUpperCase() : '?'}
@@ -69,7 +80,19 @@ export default function ApplicationCard({ application, onPress }) {
           ) : null}
         </View>
       ) : null}
-    </View>
+
+      {/* Action row */}
+      <View style={styles.actionRow}>
+        <TouchableOpacity style={styles.actionBtn} onPress={onPress} activeOpacity={0.7}>
+          <Ionicons name="pencil-outline" size={15} color={Colors.yellowDark} />
+          <Text style={styles.actionEdit}>Edit</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.actionBtn} onPress={handleDelete} activeOpacity={0.7}>
+          <Ionicons name="trash-outline" size={15} color={Colors.error} />
+          <Text style={styles.actionDelete}>Delete</Text>
+        </TouchableOpacity>
+      </View>
+    </TouchableOpacity>
   );
 }
 
@@ -82,7 +105,6 @@ const styles = StyleSheet.create({
     ...Shadows.card,
   },
 
-  // Top row
   topRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   avatar: {
     width: 44,
@@ -97,7 +119,6 @@ const styles = StyleSheet.create({
   company: { fontSize: 15, fontWeight: '700', color: Colors.textPrimary },
   role: { fontSize: 13, color: Colors.textSecondary, marginTop: 2 },
 
-  // Badge
   badge: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -110,7 +131,6 @@ const styles = StyleSheet.create({
   badgeDot: { width: 6, height: 6, borderRadius: 3 },
   badgeText: { fontSize: 11, fontWeight: '700' },
 
-  // Meta
   metaRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -126,4 +146,24 @@ const styles = StyleSheet.create({
   metaIcon: { fontSize: 11 },
   metaText: { fontSize: 12, color: Colors.textSecondary },
   metaDate: { fontSize: 12, color: Colors.textTertiary, fontStyle: 'italic' },
+
+  actionRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
+  },
+  actionBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: Radius.pill,
+    backgroundColor: Colors.bgWarm,
+  },
+  actionEdit: { fontSize: 13, fontWeight: '600', color: Colors.yellowDark },
+  actionDelete: { fontSize: 13, fontWeight: '600', color: Colors.error },
 });
