@@ -27,6 +27,7 @@ export default function Applications() {
 
   const fetchApplications = useCallback(async (page = 1) => {
     setSearchLoading(true);
+    setError('');
     try {
       const params = new URLSearchParams({ page, limit: view === 'kanban' ? 200 : 20 });
       if (searchQuery) params.set('q', searchQuery);

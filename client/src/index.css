@@ -54,9 +54,13 @@
 .scrollbar-hide::-webkit-scrollbar { display: none; }
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 
-/* Smooth page transitions */
+/* Smooth page transitions
+   NOTE: 'to' intentionally omits 'transform' so the browser reverts it to
+   'none' after the animation ends. Keeping transform: translateY(0) in 'to'
+   would create a permanent stacking context on <main> and break position:fixed
+   inside modals (they'd position relative to <main> instead of the viewport). */
 .page-enter { animation: fadeSlideUp 0.25s ease both; }
 @keyframes fadeSlideUp {
   from { opacity: 0; transform: translateY(12px); }
-  to   { opacity: 1; transform: translateY(0); }
+  to   { opacity: 1; }
 }

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import dayjs from 'dayjs';
 import api from '../../services/api';
+import Portal from '../Common/Portal';
 
 const TYPES = ['Phone', 'Video', 'Technical', 'Onsite', 'Behavioral', 'Other'];
 
@@ -83,7 +84,11 @@ export default function InterviewForm({ open, onClose, onSubmit, initial }) {
 
   if (!open) return null;
 
+  const inputCls = (hasError?: boolean) =>
+    `trackr-input${hasError ? ' !border-red-400 focus:!border-red-400' : ''}`;
+
   return (
+    <Portal>
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center px-0 sm:px-6">
       <div className="absolute inset-0 bg-black/25 backdrop-blur-sm" onClick={onClose} />
 
@@ -101,7 +106,9 @@ export default function InterviewForm({ open, onClose, onSubmit, initial }) {
 
             {/* Application */}
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-gray-700 px-1">Application *</label>
+              <label className="text-sm font-medium text-gray-700 px-1">
+                Application <span className="text-red-500">*</span>
+              </label>
               {applications.length === 0 ? (
                 <div className="bg-yellow-50 border border-yellow-200 rounded-2xl px-4 py-3 text-sm text-yellow-800">
                   No applications yet.{' '}
@@ -113,7 +120,7 @@ export default function InterviewForm({ open, onClose, onSubmit, initial }) {
                 <>
                   <select
                     {...register('application', { required: 'Application is required' })}
-                    className="trackr-input"
+                    className={inputCls(!!errors.application)}
                   >
                     <option value="">Select an application…</option>
                     {applications.map((a) => (
@@ -127,11 +134,13 @@ export default function InterviewForm({ open, onClose, onSubmit, initial }) {
 
             {/* Date & Time */}
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-gray-700 px-1">Date & Time *</label>
+              <label className="text-sm font-medium text-gray-700 px-1">
+                Date & Time <span className="text-red-500">*</span>
+              </label>
               <input
                 type="datetime-local"
                 {...register('scheduledAt', { required: 'Date & time is required' })}
-                className="trackr-input"
+                className={inputCls(!!errors.scheduledAt)}
               />
               {errors.scheduledAt && <p className="text-xs text-red-500 px-1">{errors.scheduledAt.message}</p>}
             </div>
@@ -241,5 +250,6 @@ export default function InterviewForm({ open, onClose, onSubmit, initial }) {
         </div>
       </div>
     </div>
+    </Portal>
   );
 }

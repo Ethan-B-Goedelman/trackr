@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import Portal from '../Common/Portal';
 
 const STATUSES = ['Applied', 'Phone Screen', 'Technical', 'Onsite', 'Offer', 'Accepted', 'Rejected'];
 
@@ -50,7 +51,11 @@ export default function ApplicationForm({ open, onClose, onSubmit, initial }) {
 
   if (!open) return null;
 
+  const inputCls = (hasError?: boolean) =>
+    `trackr-input${hasError ? ' !border-red-400 focus:!border-red-400' : ''}`;
+
   return (
+    <Portal>
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center px-0 sm:px-6">
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/25 backdrop-blur-sm" onClick={onClose} />
@@ -71,24 +76,28 @@ export default function ApplicationForm({ open, onClose, onSubmit, initial }) {
 
             {/* Company */}
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-gray-700 px-1">Company Name *</label>
+              <label className="text-sm font-medium text-gray-700 px-1">
+                Company Name <span className="text-red-500">*</span>
+              </label>
               <input
                 type="text"
                 placeholder="e.g., Apple Inc."
                 {...register('company', { required: 'Company is required' })}
-                className="trackr-input"
+                className={inputCls(!!errors.company)}
               />
               {errors.company && <p className="text-xs text-red-500 px-1">{errors.company.message}</p>}
             </div>
 
             {/* Role */}
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-gray-700 px-1">Role *</label>
+              <label className="text-sm font-medium text-gray-700 px-1">
+                Role <span className="text-red-500">*</span>
+              </label>
               <input
                 type="text"
                 placeholder="e.g., Software Engineer Intern"
                 {...register('role', { required: 'Role is required' })}
-                className="trackr-input"
+                className={inputCls(!!errors.role)}
               />
               {errors.role && <p className="text-xs text-red-500 px-1">{errors.role.message}</p>}
             </div>
@@ -221,5 +230,6 @@ export default function ApplicationForm({ open, onClose, onSubmit, initial }) {
         </div>
       </div>
     </div>
+    </Portal>
   );
 }

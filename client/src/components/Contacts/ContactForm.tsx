@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import api from '../../services/api';
+import Portal from '../Common/Portal';
 
-export default function ContactForm({ open, onClose, onSubmit, initial }) {
+export default function ContactForm({ open, onClose, onSubmit, initial, serverError = '' }) {
   const [applications, setApplications] = useState([]);
 
   const {
@@ -40,15 +41,26 @@ export default function ContactForm({ open, onClose, onSubmit, initial }) {
   }, [initial, open]);
 
   const handleFormSubmit = async (data) => {
+    // Strip empty strings so optional backend validators don't reject them
     await onSubmit({
-      ...data,
-      application: data.application || null,
+      name: data.name,
+      email: data.email || undefined,
+      phone: data.phone || undefined,
+      company: data.company || undefined,
+      role: data.role || undefined,
+      linkedIn: data.linkedIn || undefined,
+      notes: data.notes || undefined,
+      application: data.application || undefined,
     });
   };
 
   if (!open) return null;
 
+  const inputCls = (hasError?: boolean) =>
+    `trackr-input${hasError ? ' !border-red-400 focus:!border-red-400' : ''}`;
+
   return (
+    <Portal>
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center px-0 sm:px-6">
       <div className="absolute inset-0 bg-black/25 backdrop-blur-sm" onClick={onClose} />
 
@@ -62,16 +74,24 @@ export default function ContactForm({ open, onClose, onSubmit, initial }) {
             {initial ? 'Edit Contact' : 'Add Contact'}
           </h2>
 
+          {serverError && (
+            <div role="alert" className="bg-red-50 border border-red-200 rounded-2xl px-4 py-3 text-sm text-red-600">
+              {serverError}
+            </div>
+          )}
+
           <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4" noValidate>
 
             {/* Name */}
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-gray-700 px-1">Name *</label>
+              <label className="text-sm font-medium text-gray-700 px-1">
+                Name <span className="text-red-500">*</span>
+              </label>
               <input
                 type="text"
                 placeholder="Jane Smith"
                 {...register('name', { required: 'Name is required' })}
-                className="trackr-input"
+                className={inputCls(!!errors.name)}
               />
               {errors.name && <p className="text-xs text-red-500 px-1">{errors.name.message}</p>}
             </div>
@@ -86,7 +106,7 @@ export default function ContactForm({ open, onClose, onSubmit, initial }) {
                   {...register('email', {
                     pattern: { value: /\S+@\S+\.\S+/, message: 'Enter a valid email' },
                   })}
-                  className="trackr-input"
+                  className={inputCls(!!errors.email)}
                 />
                 {errors.email && <p className="text-xs text-red-500 px-1">{errors.email.message}</p>}
               </div>
@@ -111,18 +131,30 @@ export default function ContactForm({ open, onClose, onSubmit, initial }) {
             {/* LinkedIn */}
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-gray-700 px-1">LinkedIn URL</label>
-              <input type="url" placeholder="https://linkedin.com/in/…" {...register('linkedIn')} className="trackr-input" />
+              <input
+                type="text"
+                placeholder="https://linkedin.com/in/…"
+                {...register('linkedIn', {
+                  pattern: { value: /^(https?:\/\/)?(www\.)?linkedin\.com\/.+/, message: 'Enter a valid LinkedIn URL' },
+                })}
+                className={inputCls(!!errors.linkedIn)}
+              />
+              {errors.linkedIn && <p className="text-xs text-red-500 px-1">{errors.linkedIn.message}</p>}
             </div>
 
             {/* Linked Application */}
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-gray-700 px-1">Linked Application</label>
+              <label className="text-sm font-medium text-gray-700 px-1">
+                Linked Application
+                <span className="ml-1.5 text-xs font-normal text-gray-400">(optional)</span>
+              </label>
               <select {...register('application')} className="trackr-input">
-                <option value="">None</option>
+                <option value="">— No linked application —</option>
                 {applications.map((a) => (
                   <option key={a._id} value={a._id}>{a.company} — {a.role}</option>
                 ))}
               </select>
+              <p className="text-xs text-gray-400 px-1">You can link this contact to a job application, or leave it unlinked.</p>
             </div>
 
             {/* Notes */}
@@ -147,7 +179,7 @@ export default function ContactForm({ open, onClose, onSubmit, initial }) {
               </button>
               <button type="submit" disabled={isSubmitting} className="flex-1 btn-primary flex items-center justify-center gap-2">
                 {isSubmitting ? (
-                  <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                  <svg className="animate-spin w-4 h-4" aria-hidden="true" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                   </svg>
@@ -159,5 +191,6 @@ export default function ContactForm({ open, onClose, onSubmit, initial }) {
         </div>
       </div>
     </div>
+    </Portal>
   );
 }

@@ -112,6 +112,7 @@ export default function Contacts() {
   const [editingContact, setEditingContact] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
+  const [formError, setFormError] = useState('');
 
   useEffect(() => { document.title = 'Contacts — Trackr'; }, []);
 
@@ -135,15 +136,21 @@ export default function Contacts() {
   useEffect(() => { fetchContacts(1); }, [fetchContacts]);
 
   const handleFormSubmit = async (data) => {
-    if (editingContact) {
-      const res = await api.put(`/contacts/${editingContact._id}`, data);
-      setContacts((prev) => prev.map((c) => c._id === editingContact._id ? res.data.contact : c));
-    } else {
-      const res = await api.post('/contacts', data);
-      setContacts((prev) => [res.data.contact, ...prev]);
+    setFormError('');
+    try {
+      if (editingContact) {
+        const res = await api.put(`/contacts/${editingContact._id}`, data);
+        setContacts((prev) => prev.map((c) => c._id === editingContact._id ? res.data.contact : c));
+      } else {
+        const res = await api.post('/contacts', data);
+        setContacts((prev) => [res.data.contact, ...prev]);
+      }
+      setFormOpen(false);
+      setEditingContact(null);
+    } catch (err: any) {
+      const detail = err.response?.data?.details?.[0]?.message;
+      setFormError(detail || err.response?.data?.error || 'Failed to save contact. Please try again.');
     }
-    setFormOpen(false);
-    setEditingContact(null);
   };
 
   const handleDeleteConfirm = async () => {
@@ -247,9 +254,10 @@ export default function Contacts() {
 
       <ContactForm
         open={formOpen}
-        onClose={() => { setFormOpen(false); setEditingContact(null); }}
+        onClose={() => { setFormOpen(false); setEditingContact(null); setFormError(''); }}
         onSubmit={handleFormSubmit}
         initial={editingContact}
+        serverError={formError}
       />
 
       <ConfirmDialog
