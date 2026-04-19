@@ -140,11 +140,34 @@ export default function ApplicationForm({ open, onClose, onSubmit, initial }) {
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <label className="text-sm font-medium text-gray-700 px-1">Salary Min</label>
-                <input type="number" placeholder="120000" {...register('salaryMin')} className="trackr-input" />
+                <input
+                  type="number"
+                  placeholder="120000"
+                  {...register('salaryMin', {
+                    min: { value: 0, message: 'Must be positive' },
+                    validate: (v) => v === '' || !isNaN(Number(v)) || 'Must be a number',
+                  })}
+                  className="trackr-input"
+                />
+                {errors.salaryMin && <p className="text-xs text-red-500 px-1">{errors.salaryMin.message}</p>}
               </div>
               <div className="space-y-1.5">
                 <label className="text-sm font-medium text-gray-700 px-1">Salary Max</label>
-                <input type="number" placeholder="160000" {...register('salaryMax')} className="trackr-input" />
+                <input
+                  type="number"
+                  placeholder="160000"
+                  {...register('salaryMax', {
+                    min: { value: 0, message: 'Must be positive' },
+                    validate: (v, formValues) => {
+                      if (v === '' || !formValues.salaryMin) return true;
+                      if (isNaN(Number(v))) return 'Must be a number';
+                      if (Number(v) < Number(formValues.salaryMin)) return 'Max must be ≥ min';
+                      return true;
+                    },
+                  })}
+                  className="trackr-input"
+                />
+                {errors.salaryMax && <p className="text-xs text-red-500 px-1">{errors.salaryMax.message}</p>}
               </div>
             </div>
 
@@ -166,9 +189,13 @@ export default function ApplicationForm({ open, onClose, onSubmit, initial }) {
               <textarea
                 rows={4}
                 placeholder="Add any notes about this application…"
-                {...register('notes')}
+                maxLength={5000}
+                {...register('notes', {
+                  maxLength: { value: 5000, message: 'Notes cannot exceed 5000 characters' },
+                })}
                 className="trackr-input resize-none"
               />
+              {errors.notes && <p className="text-xs text-red-500 px-1">{errors.notes.message}</p>}
             </div>
 
             {/* Actions */}

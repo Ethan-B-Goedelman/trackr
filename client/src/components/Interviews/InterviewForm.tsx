@@ -102,16 +102,27 @@ export default function InterviewForm({ open, onClose, onSubmit, initial }) {
             {/* Application */}
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-gray-700 px-1">Application *</label>
-              <select
-                {...register('application', { required: 'Application is required' })}
-                className="trackr-input"
-              >
-                <option value="">Select an application…</option>
-                {applications.map((a) => (
-                  <option key={a._id} value={a._id}>{a.company} — {a.role}</option>
-                ))}
-              </select>
-              {errors.application && <p className="text-xs text-red-500 px-1">{errors.application.message}</p>}
+              {applications.length === 0 ? (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-2xl px-4 py-3 text-sm text-yellow-800">
+                  No applications yet.{' '}
+                  <a href="/applications" className="font-semibold underline hover:text-yellow-900">
+                    Add one first →
+                  </a>
+                </div>
+              ) : (
+                <>
+                  <select
+                    {...register('application', { required: 'Application is required' })}
+                    className="trackr-input"
+                  >
+                    <option value="">Select an application…</option>
+                    {applications.map((a) => (
+                      <option key={a._id} value={a._id}>{a.company} — {a.role}</option>
+                    ))}
+                  </select>
+                  {errors.application && <p className="text-xs text-red-500 px-1">{errors.application.message}</p>}
+                </>
+              )}
             </div>
 
             {/* Date & Time */}

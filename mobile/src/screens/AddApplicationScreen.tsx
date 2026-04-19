@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
   ScrollView, ActivityIndicator, Alert, KeyboardAvoidingView, Platform,
@@ -10,6 +10,13 @@ import api from '../services/api';
 import { Colors, Gradients, Radius, Shadows } from '../theme/colors';
 
 const STATUSES = ['Applied', 'Phone Screen', 'Technical', 'Onsite', 'Offer', 'Accepted', 'Rejected'];
+
+const isValidDate = (val: string) => {
+  if (!val) return true; // optional field
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(val)) return false;
+  const d = new Date(val);
+  return !isNaN(d.getTime());
+};
 
 function SectionHeader({ label }) {
   return <Text style={styles.sectionHeader}>{label}</Text>;
@@ -46,15 +53,46 @@ export default function AddApplicationScreen({ navigation }) {
     notes: '',
     dateApplied: new Date().toISOString().split('T')[0],
   });
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
 
-  const set = (key) => (val) => setForm((f) => ({ ...f, [key]: val }));
+  const set = (key: string) => (val: string) => setForm((f) => ({ ...f, [key]: val }));
+
+  // Warn user if they try to go back with unsaved data
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('beforeRemove', (e) => {
+      const hasData = form.company.trim() || form.role.trim() || form.notes.trim();
+      if (!hasData || loading) return;
+      e.preventDefault();
+      Alert.alert(
+        'Discard changes?',
+        'You have unsaved changes. Go back and discard them?',
+        [
+          { text: 'Keep editing', style: 'cancel' },
+          { text: 'Discard', style: 'destructive', onPress: () => navigation.dispatch(e.data.action) },
+        ]
+      );
+    });
+    return unsubscribe;
+  }, [navigation, form, loading]);
 
   const validate = () => {
-    const e = {};
+    const e: Record<string, string> = {};
     if (!form.company.trim()) e.company = 'Company is required';
     if (!form.role.trim()) e.role = 'Role is required';
+    if (form.salaryMin && isNaN(Number(form.salaryMin))) e.salaryMin = 'Must be a number';
+    if (form.salaryMax && isNaN(Number(form.salaryMax))) e.salaryMax = 'Must be a number';
+    if (
+      form.salaryMin && form.salaryMax &&
+      !isNaN(Number(form.salaryMin)) && !isNaN(Number(form.salaryMax)) &&
+      Number(form.salaryMin) > Number(form.salaryMax)
+    ) {
+      e.salaryMin = 'Min salary cannot exceed max';
+    }
+    if (form.dateApplied && !isValidDate(form.dateApplied)) {
+      e.dateApplied = 'Use format YYYY-MM-DD';
+    }
+    if (form.notes.length > 5000) e.notes = 'Notes cannot exceed 5000 characters';
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -69,7 +107,7 @@ export default function AddApplicationScreen({ navigation }) {
         salaryMax: form.salaryMax ? Number(form.salaryMax) : undefined,
       });
       navigation.goBack();
-    } catch (err) {
+    } catch (err: any) {
       Alert.alert('Error', err.response?.data?.error || 'Failed to add application');
     } finally {
       setLoading(false);
@@ -147,6 +185,7 @@ export default function AddApplicationScreen({ navigation }) {
                   value={form.salaryMin}
                   onChangeText={set('salaryMin')}
                   keyboardType="numeric"
+                  error={errors.salaryMin}
                 />
               </View>
               <View style={styles.halfField}>
@@ -156,6 +195,7 @@ export default function AddApplicationScreen({ navigation }) {
                   value={form.salaryMax}
                   onChangeText={set('salaryMax')}
                   keyboardType="numeric"
+                  error={errors.salaryMax}
                 />
               </View>
             </View>
@@ -169,6 +209,7 @@ export default function AddApplicationScreen({ navigation }) {
               placeholder="YYYY-MM-DD"
               value={form.dateApplied}
               onChangeText={set('dateApplied')}
+              error={errors.dateApplied}
             />
             <Field
               label="Job URL"
@@ -179,13 +220,15 @@ export default function AddApplicationScreen({ navigation }) {
               autoCapitalize="none"
             />
             <Field
-              label="Notes"
+              label={`Notes ${form.notes.length > 0 ? `(${form.notes.length}/5000)` : ''}`}
               placeholder="Notes about this application…"
               value={form.notes}
               onChangeText={set('notes')}
               multiline
               numberOfLines={4}
               style={styles.textarea}
+              error={errors.notes}
+              maxLength={5000}
             />
           </View>
 
@@ -242,7 +285,6 @@ const styles = StyleSheet.create({
     ...Shadows.card,
   },
 
-  // Field
   fieldWrap: { marginBottom: 14 },
   label: { fontSize: 13, fontWeight: '600', color: Colors.textSecondary, marginBottom: 8, paddingLeft: 2 },
   inputWrap: {
@@ -258,12 +300,7 @@ const styles = StyleSheet.create({
   errorText: { fontSize: 12, color: Colors.error, marginTop: 4, paddingLeft: 2 },
   textarea: { height: 88, textAlignVertical: 'top' },
 
-  // Status grid
-  statusGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
+  statusGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   statusChip: {
     paddingHorizontal: 14,
     paddingVertical: 8,
@@ -276,11 +313,9 @@ const styles = StyleSheet.create({
   statusChipText: { fontSize: 13, fontWeight: '600', color: Colors.textSecondary },
   statusChipTextActive: { color: Colors.textPrimary },
 
-  // Row layout
   row: { flexDirection: 'row', gap: 12 },
   halfField: { flex: 1 },
 
-  // Button
   btnOuter: { borderRadius: Radius.md, marginTop: 28, ...Shadows.float },
   btn: { borderRadius: Radius.md, paddingVertical: 17, alignItems: 'center' },
   btnDisabled: { opacity: 0.7 },

@@ -1,7 +1,6 @@
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 
-// Update this to your deployed API URL or local IP for device testing
 const BASE_URL = 'http://137.184.237.129/api';
 
 const api = axios.create({
@@ -9,6 +8,18 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
   timeout: 10000,
 });
+
+// Callback registered by AuthContext so the interceptor can trigger logout
+// without creating a circular import dependency.
+let _onUnauthorized: (() => void) | null = null;
+
+export const setUnauthorizedCallback = (fn: () => void) => {
+  _onUnauthorized = fn;
+};
+
+export const clearUnauthorizedCallback = () => {
+  _onUnauthorized = null;
+};
 
 api.interceptors.request.use(async (config) => {
   try {
@@ -22,9 +33,12 @@ api.interceptors.request.use(async (config) => {
 
 api.interceptors.response.use(
   (res) => res,
-  (error) => {
+  async (error) => {
     if (error.response?.status === 401) {
-      SecureStore.deleteItemAsync('trackr_token').catch(() => {});
+      // Clear stored token
+      await SecureStore.deleteItemAsync('trackr_token').catch(() => {});
+      // Notify AuthContext so React state is also reset
+      if (_onUnauthorized) _onUnauthorized();
     }
     return Promise.reject(error);
   }

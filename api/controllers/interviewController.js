@@ -1,6 +1,9 @@
 const Interview = require('../models/Interview');
 const Application = require('../models/Application');
 
+// Escape special regex characters to prevent injection
+const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 // GET /api/interviews
 const getInterviews = async (req, res, next) => {
   try {

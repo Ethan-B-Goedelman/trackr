@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
   ScrollView, ActivityIndicator, Alert, KeyboardAvoidingView, Platform,
@@ -10,6 +10,13 @@ import api from '../services/api';
 import { Colors, Gradients, Radius, Shadows } from '../theme/colors';
 
 const STATUSES = ['Applied', 'Phone Screen', 'Technical', 'Onsite', 'Offer', 'Accepted', 'Rejected'];
+
+const isValidDate = (val: string) => {
+  if (!val) return true;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(val)) return false;
+  const d = new Date(val);
+  return !isNaN(d.getTime());
+};
 
 function SectionHeader({ label }) {
   return <Text style={styles.sectionHeader}>{label}</Text>;
@@ -50,15 +57,49 @@ export default function EditApplicationScreen({ navigation, route }) {
       ? new Date(application.dateApplied).toISOString().split('T')[0]
       : new Date().toISOString().split('T')[0],
   });
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
+  const [dirty, setDirty] = useState(false);
 
-  const set = (key) => (val) => setForm((f) => ({ ...f, [key]: val }));
+  const set = (key: string) => (val: string) => {
+    setDirty(true);
+    setForm((f) => ({ ...f, [key]: val }));
+  };
+
+  // Warn user if they try to go back with unsaved changes
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('beforeRemove', (e) => {
+      if (!dirty || loading) return;
+      e.preventDefault();
+      Alert.alert(
+        'Discard changes?',
+        'You have unsaved changes. Go back and discard them?',
+        [
+          { text: 'Keep editing', style: 'cancel' },
+          { text: 'Discard', style: 'destructive', onPress: () => navigation.dispatch(e.data.action) },
+        ]
+      );
+    });
+    return unsubscribe;
+  }, [navigation, dirty, loading]);
 
   const validate = () => {
-    const e = {};
+    const e: Record<string, string> = {};
     if (!form.company.trim()) e.company = 'Company is required';
     if (!form.role.trim()) e.role = 'Role is required';
+    if (form.salaryMin && isNaN(Number(form.salaryMin))) e.salaryMin = 'Must be a number';
+    if (form.salaryMax && isNaN(Number(form.salaryMax))) e.salaryMax = 'Must be a number';
+    if (
+      form.salaryMin && form.salaryMax &&
+      !isNaN(Number(form.salaryMin)) && !isNaN(Number(form.salaryMax)) &&
+      Number(form.salaryMin) > Number(form.salaryMax)
+    ) {
+      e.salaryMin = 'Min salary cannot exceed max';
+    }
+    if (form.dateApplied && !isValidDate(form.dateApplied)) {
+      e.dateApplied = 'Use format YYYY-MM-DD';
+    }
+    if (form.notes.length > 5000) e.notes = 'Notes cannot exceed 5000 characters';
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -72,8 +113,9 @@ export default function EditApplicationScreen({ navigation, route }) {
         salaryMin: form.salaryMin ? Number(form.salaryMin) : undefined,
         salaryMax: form.salaryMax ? Number(form.salaryMax) : undefined,
       });
+      setDirty(false);
       navigation.goBack();
-    } catch (err) {
+    } catch (err: any) {
       Alert.alert('Error', err.response?.data?.error || 'Failed to update application');
     } finally {
       setLoading(false);
@@ -148,6 +190,7 @@ export default function EditApplicationScreen({ navigation, route }) {
                   value={form.salaryMin}
                   onChangeText={set('salaryMin')}
                   keyboardType="numeric"
+                  error={errors.salaryMin}
                 />
               </View>
               <View style={styles.halfField}>
@@ -157,6 +200,7 @@ export default function EditApplicationScreen({ navigation, route }) {
                   value={form.salaryMax}
                   onChangeText={set('salaryMax')}
                   keyboardType="numeric"
+                  error={errors.salaryMax}
                 />
               </View>
             </View>
@@ -169,6 +213,7 @@ export default function EditApplicationScreen({ navigation, route }) {
               placeholder="YYYY-MM-DD"
               value={form.dateApplied}
               onChangeText={set('dateApplied')}
+              error={errors.dateApplied}
             />
             <Field
               label="Job URL"
@@ -179,13 +224,15 @@ export default function EditApplicationScreen({ navigation, route }) {
               autoCapitalize="none"
             />
             <Field
-              label="Notes"
+              label={`Notes ${form.notes.length > 0 ? `(${form.notes.length}/5000)` : ''}`}
               placeholder="Notes about this application…"
               value={form.notes}
               onChangeText={set('notes')}
               multiline
               numberOfLines={4}
               style={styles.textarea}
+              error={errors.notes}
+              maxLength={5000}
             />
           </View>
 

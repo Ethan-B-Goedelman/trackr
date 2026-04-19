@@ -39,10 +39,21 @@ const limiter = rateLimit({
 });
 app.use('/api', limiter);
 
+// Stricter limiter on login to prevent brute-force attacks
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10,                   // 10 attempts per window per IP
+  message: { error: 'Too many login attempts, please try again in 15 minutes.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+  skipSuccessfulRequests: true, // Only count failed attempts
+});
+
 // ── Swagger Docs ──────────────────────────────────────────────────────────────
 setupSwagger(app);
 
 // ── Routes ────────────────────────────────────────────────────────────────────
+app.use('/api/auth/login', loginLimiter);
 app.use('/api/auth', authRoutes);
 app.use('/api/applications', applicationRoutes);
 app.use('/api/interviews', interviewRoutes);

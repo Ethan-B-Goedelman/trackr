@@ -1,6 +1,9 @@
 const Contact = require('../models/Contact');
 const Application = require('../models/Application');
 
+// Escape special regex characters to prevent injection
+const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 // GET /api/contacts
 const getContacts = async (req, res, next) => {
   try {
@@ -10,7 +13,7 @@ const getContacts = async (req, res, next) => {
     if (applicationId) filter.application = applicationId;
 
     if (q && q.trim()) {
-      const searchRegex = new RegExp(q.trim(), 'i');
+      const searchRegex = new RegExp(escapeRegex(q.trim()), 'i');
       filter.$or = [
         { name: searchRegex },
         { email: searchRegex },
@@ -102,14 +105,34 @@ const updateContact = async (req, res, next) => {
       if (req.body[field] !== undefined) updates[field] = req.body[field];
     });
 
+    // Fetch existing contact BEFORE updating so we can compare application links
+    const existingContact = await Contact.findOne({ _id: req.params.id, user: req.user._id });
+    if (!existingContact) {
+      return res.status(404).json({ error: 'Contact not found' });
+    }
+
+    const oldAppId = existingContact.application ? existingContact.application.toString() : null;
+    const newAppId = updates.application ? updates.application.toString() : null;
+
     const contact = await Contact.findOneAndUpdate(
       { _id: req.params.id, user: req.user._id },
       updates,
       { new: true, runValidators: true }
     );
 
-    if (!contact) {
-      return res.status(404).json({ error: 'Contact not found' });
+    // Fix application contacts arrays when the linked application changes
+    if (oldAppId !== newAppId) {
+      // Remove contact from the old application's contacts array
+      if (oldAppId) {
+        await Application.findByIdAndUpdate(oldAppId, { $pull: { contacts: contact._id } });
+      }
+      // Add contact to the new application's contacts array (verify ownership first)
+      if (newAppId) {
+        const newApp = await Application.findOne({ _id: newAppId, user: req.user._id });
+        if (newApp) {
+          await Application.findByIdAndUpdate(newAppId, { $addToSet: { contacts: contact._id } });
+        }
+      }
     }
 
     res.json({ contact });

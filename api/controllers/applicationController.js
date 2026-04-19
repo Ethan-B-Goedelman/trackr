@@ -1,4 +1,9 @@
 const Application = require('../models/Application');
+const Contact = require('../models/Contact');
+const Interview = require('../models/Interview');
+
+// Escape special regex characters to prevent injection
+const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 // GET /api/applications
 const getApplications = async (req, res, next) => {
@@ -10,8 +15,7 @@ const getApplications = async (req, res, next) => {
     if (status) filter.status = status;
 
     if (q && q.trim()) {
-      // Server-side search using regex (indexes used for user filter, regex for text match)
-      const searchRegex = new RegExp(q.trim(), 'i');
+      const searchRegex = new RegExp(escapeRegex(q.trim()), 'i');
       filter.$or = [
         { company: searchRegex },
         { role: searchRegex },
@@ -144,8 +148,13 @@ const deleteApplication = async (req, res, next) => {
     }
 
     // Cascade delete interviews for this application
-    const Interview = require('../models/Interview');
     await Interview.deleteMany({ application: req.params.id });
+
+    // Remove dangling application reference from any linked contacts
+    await Contact.updateMany(
+      { application: req.params.id },
+      { $unset: { application: '' } }
+    );
 
     res.json({ message: 'Application deleted' });
   } catch (err) {
