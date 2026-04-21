@@ -57,17 +57,6 @@ export default function ProfileScreen() {
         </LinearGradient>
         {fullName ? <Text style={styles.userName}>{fullName}</Text> : null}
         <Text style={styles.userEmail}>{user?.email ?? ''}</Text>
-        {user?.isVerified ? (
-          <View style={styles.verifiedBadge}>
-            <Ionicons name="checkmark-circle" size={14} color={Colors.success} />
-            <Text style={styles.verifiedText}>Verified</Text>
-          </View>
-        ) : (
-          <View style={styles.unverifiedBadge}>
-            <Ionicons name="warning-outline" size={14} color={Colors.yellowDark} />
-            <Text style={styles.unverifiedText}>Email not verified</Text>
-          </View>
-        )}
       </View>
 
       {/* Account info card */}
@@ -79,12 +68,6 @@ export default function ProfileScreen() {
           icon="person-outline"
           label="Name"
           value={fullName || '—'}
-        />
-        <View style={styles.divider} />
-        <InfoRow
-          icon="shield-checkmark-outline"
-          label="Status"
-          value={user?.isVerified ? 'Verified' : 'Unverified'}
         />
       </View>
 
@@ -156,29 +139,6 @@ const styles = StyleSheet.create({
   avatarText: { fontSize: 32, fontWeight: '800', color: '#fff' },
   userName: { fontSize: 20, fontWeight: '700', color: Colors.textPrimary, marginBottom: 4 },
   userEmail: { fontSize: 14, color: Colors.textSecondary },
-
-  verifiedBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    marginTop: 8,
-    backgroundColor: Colors.successBg,
-    borderRadius: Radius.pill,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-  },
-  verifiedText: { fontSize: 12, fontWeight: '600', color: Colors.success },
-  unverifiedBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    marginTop: 8,
-    backgroundColor: Colors.bgMuted,
-    borderRadius: Radius.pill,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-  },
-  unverifiedText: { fontSize: 12, fontWeight: '600', color: Colors.yellowDark },
 
   card: {
     backgroundColor: Colors.bgCard,
