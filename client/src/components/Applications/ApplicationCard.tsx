@@ -5,7 +5,7 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 
 dayjs.extend(relativeTime);
 
-export default function ApplicationCard({ application, onEdit, onDelete, dragging }) {
+export default function ApplicationCard({ application, onEdit, onDelete, dragging, appsWithInterviews }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const { company, role, location, salaryMin, salaryMax, dateApplied, status, jobUrl } = application;
 
@@ -22,9 +22,14 @@ export default function ApplicationCard({ application, onEdit, onDelete, draggin
     >
       <div className="flex justify-between items-start gap-2">
         <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2">
           <h3 className="font-semibold text-gray-800 truncate text-lg">{company}</h3>
+          {appsWithInterviews?.has(application._id) && (
+            <span className="w-2 h-2 rounded-full bg-blue-400 flex-shrink-0" title="Has interview" />
+          )}
+      </div>
           <p className="text-gray-600 mt-0.5 truncate">{role}</p>
-          {location && <p className="text-sm text-gray-400 mt-0.5 truncate">📍 {location}</p>}
+          {location && <p className="text-sm text-gray-400 mt-0.5 truncate">{location}</p>}
         </div>
 
         <div className="relative flex-shrink-0">

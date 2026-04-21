@@ -7,6 +7,7 @@ const COLS = [
   { id: 'role', label: 'Role' },
   { id: 'status', label: 'Status' },
   { id: 'location', label: 'Location' },
+  { id: 'salary', label: 'Salary' },
   { id: 'dateApplied', label: 'Applied' },
   { id: 'actions', label: '' },
 ];
@@ -70,6 +71,11 @@ export default function ApplicationTable({ applications, onEdit, onDelete }) {
                 <td className="px-4 py-3.5 text-gray-600">{app.role}</td>
                 <td className="px-4 py-3.5"><StatusChip status={app.status} /></td>
                 <td className="px-4 py-3.5 text-gray-500">{app.location || '—'}</td>
+                <td className="px-4 py-3.5 text-gray-500 whitespace-nowrap">
+                  {app.salaryMin || app.salaryMax
+                    ? [app.salaryMin, app.salaryMax].filter(Boolean).map((v) => `$${(v / 1000).toFixed(0)}k`).join(' – ')
+                    : '—'}
+                </td>
                 <td className="px-4 py-3.5 text-gray-500 whitespace-nowrap">
                   {app.dateApplied ? dayjs(app.dateApplied).format('MMM D, YYYY') : '—'}
                 </td>

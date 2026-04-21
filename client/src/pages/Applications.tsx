@@ -22,6 +22,7 @@ export default function Applications() {
   const [editingApp, setEditingApp] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
+  const [appsWithInterviews, setAppsWithInterviews] = useState<Set<string>>(new Set());
 
   useEffect(() => { document.title = 'Applications — Trackr'; }, []);
 
@@ -29,12 +30,15 @@ export default function Applications() {
     setSearchLoading(true);
     setError('');
     try {
-      const params = new URLSearchParams({ page, limit: view === 'kanban' ? 200 : 20 });
+      const params = new URLSearchParams({ page: String(page), limit: view === 'kanban' ? '200' : '20' });
       if (searchQuery) params.set('q', searchQuery);
       if (statusFilter) params.set('status', statusFilter);
       const res = await api.get(`/applications?${params}`);
       setApplications(res.data.applications);
       setPagination(res.data.pagination);
+      const interviewRes = await api.get('/interviews?limit=200');
+      const ids = new Set<string>(interviewRes.data.interviews.map((i: any) => i.application?._id ?? i.application));
+      setAppsWithInterviews(ids);
     } catch (err) {
       console.error('Failed to load applications', err);
       setError('Failed to load applications');
@@ -162,11 +166,12 @@ export default function Applications() {
         </div>
       ) : view === 'kanban' ? (
         <KanbanBoard
-          applications={applications}
-          onEdit={(app) => { setEditingApp(app); setFormOpen(true); }}
-          onDelete={setDeleteTarget}
-          onStatusChange={handleStatusChange}
-        />
+        applications={applications}
+        appsWithInterviews={appsWithInterviews}
+        onEdit={(app) => { setEditingApp(app); setFormOpen(true); }}
+        onDelete={setDeleteTarget}
+        onStatusChange={handleStatusChange}
+      />  
       ) : (
         <div className="space-y-4">
           <ApplicationTable

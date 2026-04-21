@@ -95,6 +95,7 @@ export default function Dashboard() {
   const [recentApps, setRecentApps]     = useState<any[]>([]);
   const [loading,    setLoading]        = useState(true);
   const [error,      setError]          = useState('');
+  const [staleApps,  setStaleApps]      = useState<any[]>([]);
 
   const hour      = new Date().getHours();
   const greeting  = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
@@ -106,8 +107,18 @@ export default function Dashboard() {
     Promise.all([
       api.get('/stats'),
       api.get('/applications?limit=3&sort=-dateApplied'),
+      api.get('/applications?status=Applied&limit=100'),
     ])
-      .then(([s, a]) => { setStats(s.data); setRecentApps(a.data.applications); })
+      .then(([s, a, stale]) => {
+        setStats(s.data);
+        setRecentApps(a.data.applications);
+        const cutoff = new Date();
+        cutoff.setDate(cutoff.getDate() - 14);
+        const staleList = stale.data.applications.filter(
+          (app: any) => new Date(app.dateApplied) < cutoff
+        );
+        setStaleApps(staleList);
+      })
       .catch(() => setError('Could not load dashboard data'))
       .finally(() => setLoading(false));
   }, []);
@@ -128,7 +139,7 @@ export default function Dashboard() {
       <div className="pt-1 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-gray-800">
-            {greeting}{firstName ? `, ${firstName}` : ''} 👋
+            {greeting}{firstName ? `, ${firstName}` : ''} 
           </h1>
           <p className="text-gray-400 text-xs mt-0.5">Here's your application progress</p>
         </div>
@@ -185,6 +196,40 @@ export default function Dashboard() {
             {new Date(nextInterview.scheduledAt).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}
           </p>
         </Link>
+      )}
+
+      {/* ── Follow-up Reminders ────────────────────────────────────────────── */}
+      {staleApps.length > 0 && (
+        <div className="glass-card p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-semibold text-gray-800">Follow-up Reminders</h2>
+            <Link to="/applications" className="text-xs text-yellow-600 font-medium hover:text-yellow-700">
+              See All →
+            </Link>
+          </div>
+          <p className="text-xs text-gray-400 mb-3">These applications haven't moved in 14+ days</p>
+          <div className="space-y-2">
+            {staleApps.slice(0, 10).map((app: any) => (
+              <div key={app._id} className="flex items-center justify-between">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-800 truncate">{app.company}</p>
+                  <p className="text-xs text-gray-400 truncate">{app.role}</p>
+                </div>
+                <p className="text-xs text-gray-400 flex-shrink-0 ml-3">
+                  {Math.floor((new Date().getTime() - new Date(app.dateApplied).getTime()) / (1000 * 60 * 60 * 24))} days ago
+                </p>
+              </div>
+            ))}
+            {staleApps.length > 10 && (
+              <Link
+                to="/applications"
+                className="block text-xs text-yellow-600 font-medium hover:text-yellow-700 pt-1"
+              >
+                {staleApps.length - 10} more applications need follow-up →
+              </Link>
+            )}
+          </div>
+        </div>
       )}
 
       {/* ── Activity chart ─────────────────────────────────────────────────── */}

@@ -17,31 +17,30 @@ export default function ContactForm({ open, onClose, onSubmit, initial, serverEr
   });
 
   useEffect(() => {
-    if (open) {
-      api.get('/applications?limit=200').then((res) => setApplications(res.data.applications));
-    }
-  }, [open]);
-
-  useEffect(() => {
     if (!open) return;
-    if (initial) {
-      reset({
-        name: initial.name || '',
-        email: initial.email || '',
-        phone: initial.phone || '',
-        company: initial.company || '',
-        role: initial.role || '',
-        linkedIn: initial.linkedIn || '',
-        notes: initial.notes || '',
-        application: initial.application?._id ?? initial.application ?? '',
-      });
-    } else {
-      reset({ name: '', email: '', phone: '', company: '', role: '', linkedIn: '', notes: '', application: '' });
-    }
-  }, [initial, open]);
+    api.get('/applications?limit=200').then((res) => {
+      setApplications(res.data.applications);
+      if (initial) {
+        reset({
+          name: initial.name || '',
+          email: initial.email || '',
+          phone: initial.phone || '',
+          company: initial.company || '',
+          role: initial.role || '',
+          linkedIn: initial.linkedIn || '',
+          notes: initial.notes || '',
+          application: initial.application?._id ?? initial.application ?? '',
+        });
+      } else {
+        reset({
+          name: '', email: '', phone: '', company: '',
+          role: '', linkedIn: '', notes: '', application: '',
+        });
+      }
+    });
+  }, [open, initial]);
 
   const handleFormSubmit = async (data) => {
-    // Strip empty strings so optional backend validators don't reject them
     await onSubmit({
       name: data.name,
       email: data.email || undefined,
@@ -82,7 +81,6 @@ export default function ContactForm({ open, onClose, onSubmit, initial, serverEr
 
           <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4" noValidate>
 
-            {/* Name */}
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-gray-700 px-1">
                 Name <span className="text-red-500">*</span>
@@ -96,7 +94,6 @@ export default function ContactForm({ open, onClose, onSubmit, initial, serverEr
               {errors.name && <p className="text-xs text-red-500 px-1">{errors.name.message}</p>}
             </div>
 
-            {/* Email + Phone */}
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <label className="text-sm font-medium text-gray-700 px-1">Email</label>
@@ -116,7 +113,6 @@ export default function ContactForm({ open, onClose, onSubmit, initial, serverEr
               </div>
             </div>
 
-            {/* Company + Role */}
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <label className="text-sm font-medium text-gray-700 px-1">Company</label>
@@ -128,7 +124,6 @@ export default function ContactForm({ open, onClose, onSubmit, initial, serverEr
               </div>
             </div>
 
-            {/* LinkedIn */}
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-gray-700 px-1">LinkedIn URL</label>
               <input
@@ -142,7 +137,6 @@ export default function ContactForm({ open, onClose, onSubmit, initial, serverEr
               {errors.linkedIn && <p className="text-xs text-red-500 px-1">{errors.linkedIn.message}</p>}
             </div>
 
-            {/* Linked Application */}
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-gray-700 px-1">
                 Linked Application
@@ -157,7 +151,6 @@ export default function ContactForm({ open, onClose, onSubmit, initial, serverEr
               <p className="text-xs text-gray-400 px-1">You can link this contact to a job application, or leave it unlinked.</p>
             </div>
 
-            {/* Notes */}
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-gray-700 px-1">Notes</label>
               <textarea
@@ -168,7 +161,6 @@ export default function ContactForm({ open, onClose, onSubmit, initial, serverEr
               />
             </div>
 
-            {/* Actions */}
             <div className="flex gap-3 pt-2">
               <button
                 type="button"

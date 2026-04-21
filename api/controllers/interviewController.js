@@ -95,9 +95,13 @@ const updateInterview = async (req, res, next) => {
     ];
 
     const updates = {};
-    allowedFields.forEach((field) => {
-      if (req.body[field] !== undefined) updates[field] = req.body[field];
-    });
+  allowedFields.forEach((field) => {
+    if (req.body[field] !== undefined) updates[field] = req.body[field];
+  });
+  if (req.body.rating === null) {
+    updates.$unset = { rating: 1 };
+    delete updates.rating;
+  }
 
     const interview = await Interview.findOneAndUpdate(
       { _id: req.params.id, user: req.user._id },

@@ -43,7 +43,7 @@ export interface Interview {
   location?: string;
   prepNotes?: string;
   reflection?: string;
-  rating?: number;
+  rating?: number | null;
   createdAt: string;
 }
 

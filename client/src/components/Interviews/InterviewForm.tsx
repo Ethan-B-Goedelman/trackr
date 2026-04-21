@@ -6,11 +6,6 @@ import Portal from '../Common/Portal';
 
 const TYPES = ['Phone', 'Video', 'Technical', 'Onsite', 'Behavioral', 'Other'];
 
-const TYPE_ICONS = {
-  Phone: '📞', Video: '🎥', Technical: '💻',
-  Onsite: '🏢', Behavioral: '🧠', Other: '📋',
-};
-
 export default function InterviewForm({ open, onClose, onSubmit, initial }) {
   const [applications, setApplications] = useState([]);
 
@@ -27,46 +22,43 @@ export default function InterviewForm({ open, onClose, onSubmit, initial }) {
       location: '',
       prepNotes: '',
       reflection: '',
-      rating: '',
+      rating: null as number | null,
     },
   });
 
   const selectedType = watch('type');
 
   useEffect(() => {
-    if (open) {
-      api.get('/applications?limit=200').then((res) => setApplications(res.data.applications));
-    }
-  }, [open]);
-
-  useEffect(() => {
     if (!open) return;
-    if (initial) {
-      reset({
-        application: initial.application?._id ?? initial.application ?? '',
-        scheduledAt: dayjs(initial.scheduledAt).format('YYYY-MM-DDTHH:mm'),
-        type: initial.type || 'Video',
-        interviewerName: initial.interviewerName || '',
-        interviewerRole: initial.interviewerRole || '',
-        location: initial.location || '',
-        prepNotes: initial.prepNotes || '',
-        reflection: initial.reflection || '',
-        rating: initial.rating ?? '',
-      });
-    } else {
-      reset({
-        application: '',
-        scheduledAt: dayjs().add(1, 'day').format('YYYY-MM-DDTHH:mm'),
-        type: 'Video',
-        interviewerName: '',
-        interviewerRole: '',
-        location: '',
-        prepNotes: '',
-        reflection: '',
-        rating: '',
-      });
-    }
-  }, [initial, open]);
+    api.get('/applications?limit=200').then((res) => {
+      setApplications(res.data.applications);
+      if (initial) {
+        reset({
+          application: initial.application?._id ?? initial.application ?? '',
+          scheduledAt: dayjs(initial.scheduledAt).format('YYYY-MM-DDTHH:mm'),
+          type: initial.type || 'Video',
+          interviewerName: initial.interviewerName || '',
+          interviewerRole: initial.interviewerRole || '',
+          location: initial.location || '',
+          prepNotes: initial.prepNotes || '',
+          reflection: initial.reflection || '',
+          rating: initial.rating ?? null,
+        });
+      } else {
+        reset({
+          application: '',
+          scheduledAt: dayjs().add(1, 'day').format('YYYY-MM-DDTHH:mm'),
+          type: 'Video',
+          interviewerName: '',
+          interviewerRole: '',
+          location: '',
+          prepNotes: '',
+          reflection: '',
+          rating: null,
+        });
+      }
+    });
+  }, [open, initial]);
 
   const handleFormSubmit = async (data) => {
     await onSubmit({
@@ -78,7 +70,7 @@ export default function InterviewForm({ open, onClose, onSubmit, initial }) {
       location: data.location,
       prepNotes: data.prepNotes,
       reflection: data.reflection,
-      rating: data.rating !== '' ? Number(data.rating) : undefined,
+      rating: data.rating !== null ? Number(data.rating) : null,
     });
   };
 
@@ -104,7 +96,6 @@ export default function InterviewForm({ open, onClose, onSubmit, initial }) {
 
           <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4" noValidate>
 
-            {/* Application */}
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-gray-700 px-1">
                 Application <span className="text-red-500">*</span>
@@ -132,7 +123,6 @@ export default function InterviewForm({ open, onClose, onSubmit, initial }) {
               )}
             </div>
 
-            {/* Date & Time */}
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-gray-700 px-1">
                 Date & Time <span className="text-red-500">*</span>
@@ -145,7 +135,6 @@ export default function InterviewForm({ open, onClose, onSubmit, initial }) {
               {errors.scheduledAt && <p className="text-xs text-red-500 px-1">{errors.scheduledAt.message}</p>}
             </div>
 
-            {/* Type — segmented control */}
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-gray-700 px-1">Interview Type</label>
               <div className="bg-white/80 backdrop-blur-sm border border-gray-200 rounded-2xl p-2 grid grid-cols-3 gap-2">
@@ -160,13 +149,12 @@ export default function InterviewForm({ open, onClose, onSubmit, initial }) {
                         : 'text-gray-500 hover:bg-gray-50'
                     }`}
                   >
-                    {TYPE_ICONS[t]} {t}
+                    {t}
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Interviewer */}
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <label className="text-sm font-medium text-gray-700 px-1">Interviewer Name</label>
@@ -178,15 +166,13 @@ export default function InterviewForm({ open, onClose, onSubmit, initial }) {
               </div>
             </div>
 
-            {/* Location */}
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-gray-700 px-1">Location / Link</label>
               <input type="text" placeholder="Zoom link or office address" {...register('location')} className="trackr-input" />
             </div>
 
-            {/* Prep Notes */}
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-gray-700 px-1">Prep Notes</label>
+              <label className="text-sm font-medium text.gray-700 px-1">Prep Notes</label>
               <textarea
                 rows={3}
                 placeholder="Topics to review, questions to ask…"
@@ -195,7 +181,6 @@ export default function InterviewForm({ open, onClose, onSubmit, initial }) {
               />
             </div>
 
-            {/* Reflection */}
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-gray-700 px-1">Post-Interview Reflection</label>
               <textarea
@@ -206,13 +191,12 @@ export default function InterviewForm({ open, onClose, onSubmit, initial }) {
               />
             </div>
 
-            {/* Rating */}
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-gray-700 px-1">Self-Rating</label>
               <div className="flex gap-2">
-                {['', 1, 2, 3, 4, 5].map((n) => (
+                {([null, 1, 2, 3, 4, 5] as (number | null)[]).map((n) => (
                   <button
-                    key={n}
+                    key={n ?? 'none'}
                     type="button"
                     onClick={() => setValue('rating', n)}
                     className={`flex-1 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
@@ -221,13 +205,12 @@ export default function InterviewForm({ open, onClose, onSubmit, initial }) {
                         : 'bg-white/80 border border-gray-200 text-gray-500 hover:bg-gray-50'
                     }`}
                   >
-                    {n === '' ? '—' : `${n}★`}
+                    {n === null ? '—' : `${n}★`}
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Actions */}
             <div className="flex gap-3 pt-2">
               <button
                 type="button"
