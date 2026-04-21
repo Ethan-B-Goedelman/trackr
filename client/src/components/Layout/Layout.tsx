@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
-import BottomTabBar from './BottomTabBar';
 import TopBar from './TopBar';
 
 export default function Layout() {
@@ -21,8 +20,6 @@ export default function Layout() {
           <Outlet />
         </main>
 
-        {/* Bottom tab bar (mobile only) */}
-        <BottomTabBar />
       </div>
     </div>
   );
