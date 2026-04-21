@@ -46,13 +46,15 @@ export default function DashboardScreen({ navigation }: any) {
   const fetchData = useCallback(async () => {
     try {
       const [statsRes, contactsRes, appsRes] = await Promise.all([
-        api.get('/stats/summary'),
+        api.get('/stats'),
         api.get('/contacts?limit=1'),
         api.get('/applications?limit=5'),
       ]);
       setStats(statsRes.data);
       setContactsTotal(
-        contactsRes.data.total ?? contactsRes.data.contacts?.length ?? 0
+        contactsRes.data.pagination?.total ??
+        contactsRes.data.total ??
+        contactsRes.data.contacts?.length ?? 0
       );
       setRecentApps(appsRes.data.applications ?? []);
       setError('');
@@ -76,7 +78,8 @@ export default function DashboardScreen({ navigation }: any) {
   const totalApps = stats?.summary?.totalApplications ?? 0;
   const upcomingInterviews = stats?.summary?.upcomingInterviews ?? 0;
   const nextInterview: Interview | null = stats?.nextInterview ?? null;
-  const pipeline: { _id: string; count: number }[] = stats?.pipeline ?? [];
+  // API returns statusBreakdown: [{ status, count }]
+  const pipeline: { status: string; count: number }[] = stats?.statusBreakdown ?? [];
 
   if (loading) {
     return (
@@ -217,12 +220,12 @@ export default function DashboardScreen({ navigation }: any) {
             <Text style={styles.sectionTitle}>Pipeline</Text>
             <View style={styles.card}>
               {pipeline.slice(0, 5).map((p) => {
-                const s = STATUS_STYLES[p._id] ?? STATUS_STYLES['Applied'];
+                const s = STATUS_STYLES[p.status] ?? STATUS_STYLES['Applied'];
                 const pct = totalApps > 0 ? (p.count / totalApps) * 100 : 0;
                 return (
-                  <View key={p._id} style={styles.pipelineRow}>
+                  <View key={p.status} style={styles.pipelineRow}>
                     <View style={[styles.pipelineDot, { backgroundColor: s.dot }]} />
-                    <Text style={styles.pipelineLabel}>{p._id}</Text>
+                    <Text style={styles.pipelineLabel}>{p.status}</Text>
                     <View style={styles.pipelineBarBg}>
                       <View style={[styles.pipelineBar, { width: `${pct}%` as any, backgroundColor: s.dot }]} />
                     </View>
