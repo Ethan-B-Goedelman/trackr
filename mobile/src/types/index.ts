@@ -28,6 +28,45 @@ export type ApplicationStatus =
   | 'Accepted'
   | 'Rejected';
 
+export interface ApplicationRef {
+  _id: string;
+  company: string;
+  role: string;
+}
+
+export interface Interview {
+  _id: string;
+  application?: ApplicationRef | string;
+  scheduledAt: string;
+  type: InterviewType;
+  interviewerName?: string;
+  interviewerRole?: string;
+  location?: string;
+  prepNotes?: string;
+  reflection?: string;
+  rating?: number;
+}
+
+export type InterviewType =
+  | 'Phone'
+  | 'Video'
+  | 'Technical'
+  | 'Onsite'
+  | 'Behavioral'
+  | 'Other';
+
+export interface Contact {
+  _id: string;
+  name: string;
+  email?: string;
+  phone?: string;
+  company?: string;
+  role?: string;
+  linkedIn?: string;
+  notes?: string;
+  application?: ApplicationRef | string;
+}
+
 export interface AuthContextType {
   user: User | null;
   loading: boolean;
