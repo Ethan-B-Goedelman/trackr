@@ -39,16 +39,18 @@ export default function DashboardScreen({ navigation }: any) {
   const [stats, setStats] = useState<any>(null);
   const [contactsTotal, setContactsTotal] = useState(0);
   const [recentApps, setRecentApps] = useState<any[]>([]);
+  const [staleApps, setStaleApps] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState('');
 
   const fetchData = useCallback(async () => {
     try {
-      const [statsRes, contactsRes, appsRes] = await Promise.all([
+      const [statsRes, contactsRes, appsRes, appliedRes] = await Promise.all([
         api.get('/stats'),
         api.get('/contacts?limit=1'),
         api.get('/applications?limit=5'),
+        api.get('/applications?status=Applied&limit=100&sort=dateApplied'),
       ]);
       setStats(statsRes.data);
       setContactsTotal(
@@ -57,6 +59,15 @@ export default function DashboardScreen({ navigation }: any) {
         contactsRes.data.contacts?.length ?? 0
       );
       setRecentApps(appsRes.data.applications ?? []);
+
+      // Filter for apps stuck in "Applied" for 14+ days
+      const cutoff = new Date();
+      cutoff.setDate(cutoff.getDate() - 14);
+      const stale = (appliedRes.data.applications ?? []).filter(
+        (a: any) => a.dateApplied && new Date(a.dateApplied) < cutoff
+      );
+      setStaleApps(stale);
+
       setError('');
     } catch {
       setError('Could not load dashboard data.');
@@ -211,6 +222,67 @@ export default function DashboardScreen({ navigation }: any) {
                 ) : null}
               </LinearGradient>
             </TouchableOpacity>
+          </View>
+        ) : null}
+
+        {/* ── Follow-up Reminder ── */}
+        {staleApps.length > 0 ? (
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <View style={styles.followUpTitleRow}>
+                <View style={styles.followUpIconWrap}>
+                  <Ionicons name="notifications-outline" size={15} color="#d97706" />
+                </View>
+                <Text style={styles.sectionTitle}>Follow-up Needed</Text>
+              </View>
+              <View style={styles.followUpBadge}>
+                <Text style={styles.followUpBadgeText}>{staleApps.length}</Text>
+              </View>
+            </View>
+            <Text style={styles.followUpHint}>
+              Stuck in "Applied" for 14+ days — consider following up.
+            </Text>
+            <View style={styles.card}>
+              {staleApps.slice(0, 3).map((app: any, idx: number) => {
+                const daysAgo = Math.floor(
+                  (Date.now() - new Date(app.dateApplied).getTime()) / 86_400_000
+                );
+                return (
+                  <React.Fragment key={app._id}>
+                    <TouchableOpacity
+                      style={styles.appRow}
+                      onPress={() => navigation.navigate('Applications')}
+                      activeOpacity={0.7}
+                    >
+                      <View style={[styles.appAvatar, { backgroundColor: '#fef3c7' }]}>
+                        <Text style={[styles.appAvatarLetter, { color: '#92400e' }]}>
+                          {app.company?.[0]?.toUpperCase() ?? '?'}
+                        </Text>
+                      </View>
+                      <View style={styles.appInfo}>
+                        <Text style={styles.appCompany} numberOfLines={1}>{app.company}</Text>
+                        <Text style={styles.appRole} numberOfLines={1}>{app.role}</Text>
+                      </View>
+                      <Text style={styles.followUpDays}>{daysAgo}d ago</Text>
+                    </TouchableOpacity>
+                    {idx < Math.min(staleApps.length, 3) - 1 && (
+                      <View style={styles.rowDivider} />
+                    )}
+                  </React.Fragment>
+                );
+              })}
+              {staleApps.length > 3 && (
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('Applications')}
+                  activeOpacity={0.7}
+                  style={styles.followUpMore}
+                >
+                  <Text style={styles.followUpMoreText}>
+                    +{staleApps.length - 3} more — View all →
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </View>
           </View>
         ) : null}
 
@@ -409,6 +481,33 @@ const styles = StyleSheet.create({
   niDate: { fontSize: 13, fontWeight: '600', color: Colors.textPrimary },
   niRelative: { fontSize: 13, color: Colors.textSecondary },
   niLocation: { fontSize: 13, color: Colors.textSecondary, flex: 1 },
+
+  // Follow-up reminder
+  followUpTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  followUpIconWrap: {
+    width: 26,
+    height: 26,
+    borderRadius: Radius.sm,
+    backgroundColor: '#fef3c7',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  followUpBadge: {
+    backgroundColor: '#fef3c7',
+    borderRadius: Radius.pill,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+  },
+  followUpBadgeText: { fontSize: 12, fontWeight: '800', color: '#d97706' },
+  followUpHint: {
+    fontSize: 12,
+    color: Colors.textTertiary,
+    marginBottom: 10,
+    marginTop: -4,
+  },
+  followUpDays: { fontSize: 12, fontWeight: '700', color: '#d97706', flexShrink: 0 },
+  followUpMore: { paddingTop: 12, alignItems: 'center' },
+  followUpMoreText: { fontSize: 13, fontWeight: '600', color: '#d97706' },
 
   // Pipeline
   pipelineRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 },
