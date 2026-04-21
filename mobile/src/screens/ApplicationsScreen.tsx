@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import {
   View, Text, FlatList, StyleSheet, ActivityIndicator,
   RefreshControl, TouchableOpacity, TextInput,
@@ -24,6 +24,8 @@ export default function ApplicationsScreen({ navigation }: any) {
   const [query, setQuery] = useState('');
   const [searchActive, setSearchActive] = useState(false);
   const [searchLoading, setSearchLoading] = useState(false);
+  const [contactMap, setContactMap] = useState<Record<string, string>>({});
+  const [interviewSet, setInterviewSet] = useState<Set<string>>(new Set());
   const searchRef = useRef<TextInput>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -51,6 +53,32 @@ export default function ApplicationsScreen({ navigation }: any) {
   useFocusEffect(
     useCallback(() => { fetchApplications(); }, [filter])
   );
+
+  // Fetch contact + interview data once on mount (supplemental, silent fail)
+  useEffect(() => {
+    Promise.all([
+      api.get('/contacts?limit=200'),
+      api.get('/interviews?limit=200'),
+    ]).then(([cRes, iRes]) => {
+      const cMap: Record<string, string> = {};
+      (cRes.data.contacts ?? []).forEach((c: any) => {
+        if (c.application) {
+          const appId = typeof c.application === 'object' ? c.application._id : c.application;
+          if (appId) cMap[appId] = c.name;
+        }
+      });
+      setContactMap(cMap);
+
+      const iSet = new Set<string>();
+      (iRes.data.interviews ?? []).forEach((i: any) => {
+        if (i.application) {
+          const appId = typeof i.application === 'object' ? i.application._id : i.application;
+          if (appId) iSet.add(appId);
+        }
+      });
+      setInterviewSet(iSet);
+    }).catch(() => {});
+  }, []);
 
   const onRefresh = () => { setRefreshing(true); fetchApplications(); };
 
@@ -194,6 +222,8 @@ export default function ApplicationsScreen({ navigation }: any) {
               application={item}
               onPress={() => navigation.navigate('EditApplication', { application: item })}
               onDelete={() => handleDelete(item._id)}
+              hasInterview={interviewSet.has(item._id)}
+              contactName={contactMap[item._id] ?? null}
             />
           </View>
         )}

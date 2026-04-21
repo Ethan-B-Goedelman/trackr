@@ -93,6 +93,7 @@ export default function Dashboard() {
   const { user }                        = useAuth();
   const [stats,      setStats]          = useState<any>(null);
   const [recentApps, setRecentApps]     = useState<any[]>([]);
+  const [staleApps,  setStaleApps]      = useState<any[]>([]);
   const [loading,    setLoading]        = useState(true);
   const [error,      setError]          = useState('');
 
@@ -106,8 +107,19 @@ export default function Dashboard() {
     Promise.all([
       api.get('/stats'),
       api.get('/applications?limit=3&sort=-dateApplied'),
+      api.get('/applications?status=Applied&limit=100&sort=dateApplied'),
     ])
-      .then(([s, a]) => { setStats(s.data); setRecentApps(a.data.applications); })
+      .then(([s, a, applied]) => {
+        setStats(s.data);
+        setRecentApps(a.data.applications);
+        // Filter for apps stuck in "Applied" for 14+ days
+        const cutoff = new Date();
+        cutoff.setDate(cutoff.getDate() - 14);
+        const stale = (applied.data.applications ?? []).filter(
+          (app: any) => app.dateApplied && new Date(app.dateApplied) < cutoff
+        );
+        setStaleApps(stale);
+      })
       .catch(() => setError('Could not load dashboard data'))
       .finally(() => setLoading(false));
   }, []);
@@ -229,6 +241,53 @@ export default function Dashboard() {
           </div>
         )}
       </div>
+
+      {/* ── Follow-up Reminder ─────────────────────────────────────────────── */}
+      {staleApps.length > 0 && (
+        <div className="glass-card p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-7 h-7 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <svg className="w-3.5 h-3.5 text-amber-500" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                  d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+              </svg>
+            </div>
+            <h2 className="text-sm font-semibold text-gray-800">Follow-up Needed</h2>
+            <span className="ml-auto bg-amber-100 text-amber-700 text-xs font-bold px-2 py-0.5 rounded-full">
+              {staleApps.length}
+            </span>
+          </div>
+          <p className="text-xs text-gray-400 mb-3">
+            These applications have been in "Applied" for 14+ days with no response.
+          </p>
+          <div className="space-y-1.5">
+            {staleApps.slice(0, 3).map((app: any) => {
+              const daysAgo = Math.floor((Date.now() - new Date(app.dateApplied).getTime()) / 86_400_000);
+              return (
+                <Link
+                  key={app._id}
+                  to="/applications"
+                  className="flex items-center gap-3 bg-amber-50/70 rounded-2xl px-3 py-2.5 hover:bg-amber-100/70 transition-colors"
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-gray-800 truncate">{app.company}</p>
+                    <p className="text-xs text-gray-500 truncate">{app.role}</p>
+                  </div>
+                  <p className="text-xs text-amber-600 font-semibold flex-shrink-0">{daysAgo}d ago</p>
+                </Link>
+              );
+            })}
+            {staleApps.length > 3 && (
+              <Link
+                to="/applications"
+                className="text-xs text-amber-600 font-medium block text-center pt-1 hover:text-amber-700"
+              >
+                +{staleApps.length - 3} more — View all →
+              </Link>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* ── Pipeline + Recent (side by side on md+) ───────────────────────── */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
