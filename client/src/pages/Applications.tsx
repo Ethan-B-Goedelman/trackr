@@ -18,12 +18,43 @@ export default function Applications() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
 
+  const [contactMap, setContactMap] = useState<Record<string, string>>({});
+  const [interviewSet, setInterviewSet] = useState<Set<string>>(new Set());
+
   const [formOpen, setFormOpen] = useState(false);
   const [editingApp, setEditingApp] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
 
   useEffect(() => { document.title = 'Applications — Trackr'; }, []);
+
+  // Fetch supplemental contact + interview data once on mount
+  useEffect(() => {
+    Promise.all([
+      api.get('/contacts?limit=200'),
+      api.get('/interviews?limit=200'),
+    ]).then(([cRes, iRes]) => {
+      // Build applicationId → contact name map
+      const cMap: Record<string, string> = {};
+      (cRes.data.contacts ?? []).forEach((c: any) => {
+        if (c.application) {
+          const appId = typeof c.application === 'object' ? c.application._id : c.application;
+          if (appId) cMap[appId] = c.name;
+        }
+      });
+      setContactMap(cMap);
+
+      // Build set of applicationIds that have at least one interview
+      const iSet = new Set<string>();
+      (iRes.data.interviews ?? []).forEach((i: any) => {
+        if (i.application) {
+          const appId = typeof i.application === 'object' ? i.application._id : i.application;
+          if (appId) iSet.add(appId);
+        }
+      });
+      setInterviewSet(iSet);
+    }).catch(() => {}); // supplemental — fail silently
+  }, []);
 
   const fetchApplications = useCallback(async (page = 1) => {
     setSearchLoading(true);
@@ -166,6 +197,8 @@ export default function Applications() {
           onEdit={(app) => { setEditingApp(app); setFormOpen(true); }}
           onDelete={setDeleteTarget}
           onStatusChange={handleStatusChange}
+          contactMap={contactMap}
+          interviewSet={interviewSet}
         />
       ) : (
         <div className="space-y-4">
@@ -173,6 +206,8 @@ export default function Applications() {
             applications={applications}
             onEdit={(app) => { setEditingApp(app); setFormOpen(true); }}
             onDelete={setDeleteTarget}
+            contactMap={contactMap}
+            interviewSet={interviewSet}
           />
           {pagination.pages > 1 && (
             <nav aria-label="Pagination" className="flex justify-center gap-2">

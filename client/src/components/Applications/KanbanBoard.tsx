@@ -21,16 +21,23 @@ const COLUMN_STYLES = {
   'Rejected':     'bg-gray-50/60 border-gray-100',
 };
 
-function SortableCard({ application, onEdit, onDelete }) {
+function SortableCard({ application, onEdit, onDelete, contactMap, interviewSet }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: application._id });
   return (
     <div ref={setNodeRef} style={{ transform: CSS.Transform.toString(transform), transition }} {...attributes} {...listeners}>
-      <ApplicationCard application={application} onEdit={onEdit} onDelete={onDelete} dragging={isDragging} />
+      <ApplicationCard
+        application={application}
+        onEdit={onEdit}
+        onDelete={onDelete}
+        dragging={isDragging}
+        hasInterview={interviewSet.has(application._id)}
+        contactName={contactMap[application._id] ?? null}
+      />
     </div>
   );
 }
 
-function Column({ status, applications, onEdit, onDelete }) {
+function Column({ status, applications, onEdit, onDelete, contactMap, interviewSet }) {
   return (
     <div className="flex-shrink-0 w-64">
       <div className={`${COLUMN_STYLES[status] ?? 'bg-gray-50/60 border-gray-100'} border rounded-3xl p-3 min-h-[400px]`}>
@@ -43,7 +50,14 @@ function Column({ status, applications, onEdit, onDelete }) {
         <SortableContext items={applications.map((a) => a._id)} strategy={verticalListSortingStrategy}>
           <div className="space-y-2">
             {applications.map((app) => (
-              <SortableCard key={app._id} application={app} onEdit={onEdit} onDelete={onDelete} />
+              <SortableCard
+                key={app._id}
+                application={app}
+                onEdit={onEdit}
+                onDelete={onDelete}
+                contactMap={contactMap}
+                interviewSet={interviewSet}
+              />
             ))}
           </div>
         </SortableContext>
@@ -52,7 +66,7 @@ function Column({ status, applications, onEdit, onDelete }) {
   );
 }
 
-export default function KanbanBoard({ applications, onEdit, onDelete, onStatusChange }) {
+export default function KanbanBoard({ applications, onEdit, onDelete, onStatusChange, contactMap = {}, interviewSet = new Set() }) {
   const [activeApp, setActiveApp] = useState(null);
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
@@ -86,11 +100,28 @@ export default function KanbanBoard({ applications, onEdit, onDelete, onStatusCh
     >
       <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide">
         {STATUSES.map((s) => (
-          <Column key={s} status={s} applications={byStatus[s]} onEdit={onEdit} onDelete={onDelete} />
+          <Column
+            key={s}
+            status={s}
+            applications={byStatus[s]}
+            onEdit={onEdit}
+            onDelete={onDelete}
+            contactMap={contactMap}
+            interviewSet={interviewSet}
+          />
         ))}
       </div>
       <DragOverlay>
-        {activeApp ? <ApplicationCard application={activeApp} onEdit={() => {}} onDelete={() => {}} dragging /> : null}
+        {activeApp ? (
+          <ApplicationCard
+            application={activeApp}
+            onEdit={() => {}}
+            onDelete={() => {}}
+            dragging
+            hasInterview={interviewSet.has(activeApp._id)}
+            contactName={contactMap[activeApp._id] ?? null}
+          />
+        ) : null}
       </DragOverlay>
     </DndContext>
   );

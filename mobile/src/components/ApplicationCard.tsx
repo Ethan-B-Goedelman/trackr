@@ -17,7 +17,7 @@ const STATUS_STYLES = {
   'Rejected':     { bg: '#f3f4f6', text: '#6b7280', dot: '#9ca3af' },
 };
 
-export default function ApplicationCard({ application, onPress, onDelete }) {
+export default function ApplicationCard({ application, onPress, onDelete, hasInterview = false, contactName = null }) {
   const { company, role, status, location, salaryMin, salaryMax, dateApplied } = application;
   const s = STATUS_STYLES[status] ?? STATUS_STYLES['Applied'];
 
@@ -45,6 +45,7 @@ export default function ApplicationCard({ application, onPress, onDelete }) {
           <Text style={[styles.avatarLetter, { color: s.text }]}>
             {company ? company[0].toUpperCase() : '?'}
           </Text>
+          {hasInterview && <View style={styles.interviewDot} />}
         </View>
 
         <View style={styles.info}>
@@ -59,7 +60,7 @@ export default function ApplicationCard({ application, onPress, onDelete }) {
       </View>
 
       {/* Meta row */}
-      {(location || salary || dateApplied) ? (
+      {(location || salary || dateApplied || contactName) ? (
         <View style={styles.metaRow}>
           {location ? (
             <View style={styles.metaItem}>
@@ -71,6 +72,12 @@ export default function ApplicationCard({ application, onPress, onDelete }) {
             <View style={styles.metaItem}>
               <Text style={styles.metaIcon}>💰</Text>
               <Text style={styles.metaText}>{salary}</Text>
+            </View>
+          ) : null}
+          {contactName ? (
+            <View style={styles.metaItem}>
+              <Text style={styles.metaIcon}>👤</Text>
+              <Text style={styles.metaText} numberOfLines={1}>{contactName}</Text>
             </View>
           ) : null}
           {dateApplied ? (
@@ -118,6 +125,18 @@ const styles = StyleSheet.create({
   info: { flex: 1, minWidth: 0 },
   company: { fontSize: 15, fontWeight: '700', color: Colors.textPrimary },
   role: { fontSize: 13, color: Colors.textSecondary, marginTop: 2 },
+
+  interviewDot: {
+    position: 'absolute',
+    top: -2,
+    right: -2,
+    width: 11,
+    height: 11,
+    borderRadius: 6,
+    backgroundColor: '#f97316',
+    borderWidth: 2,
+    borderColor: Colors.bgCard,
+  },
 
   badge: {
     flexDirection: 'row',
