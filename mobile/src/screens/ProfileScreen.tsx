@@ -76,20 +76,20 @@ export default function ProfileScreen() {
         <Text style={styles.cardTitle}>App</Text>
         <TouchableOpacity
           style={styles.row}
-          onPress={() => Linking.openURL('https://jobtrackrrr.com')}
+          onPress={() => Linking.openURL('https://jobtrackerrr.com')}
           activeOpacity={0.7}
         >
           <View style={styles.rowIcon}>
             <Ionicons name="globe-outline" size={18} color={Colors.yellowDark} />
           </View>
           <Text style={styles.rowLabel}>Web App</Text>
-          <Text style={styles.rowLink}>jobtrackrrr.com</Text>
+          <Text style={styles.rowLink}>jobtrackerrr.com</Text>
           <Ionicons name="open-outline" size={14} color={Colors.textTertiary} style={{ marginLeft: 4 }} />
         </TouchableOpacity>
         <View style={styles.divider} />
         <TouchableOpacity
           style={styles.row}
-          onPress={() => Linking.openURL('mailto:support@jobtrackrrr.com')}
+          onPress={() => Linking.openURL('mailto:support@jobtrackerrr.com')}
           activeOpacity={0.7}
         >
           <View style={styles.rowIcon}>

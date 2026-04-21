@@ -138,7 +138,7 @@ export default function LoginScreen({ navigation }) {
 
             {/* Create Account */}
             <TouchableOpacity
-              onPress={() => Linking.openURL('https://jobtrackrrr.com/register')}
+              onPress={() => Linking.openURL('https://jobtrackerrr.com/register')}
               activeOpacity={0.85}
               style={styles.btnOutlined}
             >
@@ -148,7 +148,7 @@ export default function LoginScreen({ navigation }) {
             {/* Forgot Password */}
             <TouchableOpacity
               style={styles.forgotWrap}
-              onPress={() => Linking.openURL('https://jobtrackrrr.com/forgot-password')}
+              onPress={() => Linking.openURL('https://jobtrackerrr.com/forgot-password')}
             >
               <Text style={styles.forgotText}>Forgot password?</Text>
             </TouchableOpacity>
@@ -159,10 +159,10 @@ export default function LoginScreen({ navigation }) {
           <View style={styles.footer}>
             <Text style={styles.footerText}>Don't have an account? Register at </Text>
             <TouchableOpacity
-              onPress={() => Linking.openURL('https://jobtrackrrr.com')}
+              onPress={() => Linking.openURL('https://jobtrackerrr.com')}
               hitSlop={{ top: 6, bottom: 6, left: 4, right: 4 }}
             >
-              <Text style={styles.footerLink}>jobtrackrrr.com</Text>
+              <Text style={styles.footerLink}>jobtrackerrr.com</Text>
             </TouchableOpacity>
           </View>
 
