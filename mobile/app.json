@@ -13,20 +13,26 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.trackr.app"
+      "bundleIdentifier": "com.ethangoedelman.trackr",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#fde68a"
       },
-      "package": "com.trackr.app"
+      "package": "com.ethangoedelman.trackr"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "extra": {
-      "apiUrl": "http://localhost:5000"
+      "apiUrl": "http://localhost:5000",
+      "eas": {
+        "projectId": "4e7a52be-df27-4d16-a9a6-5d247e014d9c"
+      }
     },
     "plugins": [
       "expo-secure-store"
