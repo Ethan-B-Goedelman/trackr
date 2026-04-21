@@ -76,7 +76,7 @@ export default function ProfileScreen() {
         <Text style={styles.cardTitle}>App</Text>
         <TouchableOpacity
           style={styles.row}
-          onPress={() => Linking.openURL('https://jobtrackerrr.com')}
+          onPress={() => Linking.openURL('http://jobtrackerrr.com')}
           activeOpacity={0.7}
         >
           <View style={styles.rowIcon}>
