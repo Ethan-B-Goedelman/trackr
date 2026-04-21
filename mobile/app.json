@@ -9,16 +9,18 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#1976d2"
+      "backgroundColor": "#fffbeb"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.trackr.app"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#1976d2"
-      }
+        "backgroundColor": "#fde68a"
+      },
+      "package": "com.trackr.app"
     },
     "web": {
       "favicon": "./assets/favicon.png"
