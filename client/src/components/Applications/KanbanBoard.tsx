@@ -176,6 +176,7 @@ export default function KanbanBoard({ applications, onEdit, onDelete, onStatusCh
       <DndContext
         sensors={sensors}
         collisionDetection={closestCorners}
+        modifiers={[snapCenterToCursor]}
         onDragStart={({ active }) => setActiveApp(applications.find((a) => a._id === active.id) ?? null)}
         onDragEnd={handleDragEnd}
       >
@@ -196,7 +197,7 @@ export default function KanbanBoard({ applications, onEdit, onDelete, onStatusCh
           ))}
         </div>
 
-        <DragOverlay modifiers={[snapCenterToCursor]}>
+        <DragOverlay>
           {activeApp ? (
             <ApplicationCard
               application={activeApp}
