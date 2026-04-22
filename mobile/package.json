@@ -9,23 +9,6 @@
     "web": "expo start --web",
     "test": "jest"
   },
-  "jest": {
-    "testEnvironment": "node",
-    "testMatch": [
-      "**/__tests__/**/*.test.ts"
-    ],
-    "transform": {
-      "^.+\\.tsx?$": [
-        "babel-jest",
-        {
-          "presets": [
-            "@babel/preset-env",
-            "@babel/preset-typescript"
-          ]
-        }
-      ]
-    }
-  },
   "dependencies": {
     "@react-navigation/bottom-tabs": "^6.5.11",
     "@react-navigation/native": "^6.1.9",
@@ -44,17 +27,28 @@
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
-    "@babel/preset-env": "^7.29.2",
-    "@babel/preset-typescript": "^7.28.5",
     "@expo/ngrok": "^4.1.1",
     "@napi-rs/canvas": "^0.1.99",
-    "@testing-library/react-native": "^13.3.3",
-    "@types/jest": "^30.0.0",
     "@types/react": "~19.1.10",
     "@types/react-native": "^0.73.0",
-    "jest": "^30.3.0",
-    "jest-expo": "^55.0.16",
     "typescript": "^5.3.3"
   },
-  "private": true
+  "private": true,
+  "jest": {
+    "testEnvironment": "node",
+    "testMatch": [
+      "**/__tests__/**/*.test.ts"
+    ],
+    "transform": {
+      "^.+.tsx?$": [
+        "babel-jest",
+        {
+          "presets": [
+            "@babel/preset-env",
+            "@babel/preset-typescript"
+          ]
+        }
+      ]
+    }
+  }
 }

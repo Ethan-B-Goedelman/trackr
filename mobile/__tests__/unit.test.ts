@@ -4,7 +4,6 @@
  */
 
 // ─── Salary Formatter ─────────────────────────────────────────────────────────
-// Replicates the salary logic in mobile/src/components/ApplicationCard.tsx
 
 function formatSalary(min?: number | null, max?: number | null): string | null {
   if (!min && !max) return null;
@@ -34,7 +33,6 @@ describe('Salary Formatter', () => {
 });
 
 // ─── Dashboard Greeting ───────────────────────────────────────────────────────
-// Replicates the greeting() function from DashboardScreen.tsx
 
 function greeting(hour: number): string {
   if (hour < 12) return 'Good morning';
@@ -60,7 +58,6 @@ describe('Dashboard Greeting', () => {
 });
 
 // ─── Status Style Lookup ──────────────────────────────────────────────────────
-// Tests that every application status has a defined style in ApplicationCard
 
 const STATUS_STYLES: Record<string, { bg: string; text: string; dot: string }> = {
   'Applied':      { bg: '#dbeafe', text: '#1d4ed8', dot: '#3b82f6' },
@@ -75,9 +72,7 @@ const STATUS_STYLES: Record<string, { bg: string; text: string; dot: string }> =
 describe('Status Style Lookup', () => {
   it('has a style defined for every application status', () => {
     const statuses = ['Applied', 'Phone Screen', 'Technical', 'Onsite', 'Offer', 'Accepted', 'Rejected'];
-    statuses.forEach((s) => {
-      expect(STATUS_STYLES[s]).toBeDefined();
-    });
+    statuses.forEach((s) => expect(STATUS_STYLES[s]).toBeDefined());
   });
 
   it('each status style has bg, text, and dot colour properties', () => {
@@ -96,7 +91,6 @@ describe('Status Style Lookup', () => {
 });
 
 // ─── Initials Generator ───────────────────────────────────────────────────────
-// Replicates the avatar initials logic from ProfileScreen.tsx
 
 function getInitials(firstName?: string, lastName?: string, email?: string): string {
   const fullName = [firstName, lastName].filter(Boolean).join(' ');

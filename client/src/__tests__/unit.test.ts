@@ -6,7 +6,6 @@
 import { describe, it, expect } from 'vitest';
 
 // ─── Salary Formatter ────────────────────────────────────────────────────────
-// Replicates the salary formatting logic used in ApplicationCard & ApplicationTable
 
 function formatSalary(min?: number | null, max?: number | null): string | null {
   if (!min && !max) return null;
@@ -36,7 +35,6 @@ describe('Salary Formatter', () => {
 });
 
 // ─── Application Status List ──────────────────────────────────────────────────
-// Validates the canonical status list used across Kanban and filters
 
 const APPLICATION_STATUSES = [
   'Applied', 'Phone Screen', 'Technical',
@@ -60,7 +58,6 @@ describe('Application Statuses', () => {
 });
 
 // ─── Stale Application Detection ─────────────────────────────────────────────
-// Replicates the follow-up reminder logic from Dashboard
 
 function getStaleApps(applications: { dateApplied?: string }[], days = 14) {
   const cutoff = new Date();
@@ -74,15 +71,13 @@ describe('Stale Application Detection', () => {
   it('flags applications older than 14 days', () => {
     const old = new Date();
     old.setDate(old.getDate() - 20);
-    const apps = [{ dateApplied: old.toISOString() }];
-    expect(getStaleApps(apps)).toHaveLength(1);
+    expect(getStaleApps([{ dateApplied: old.toISOString() }])).toHaveLength(1);
   });
 
   it('does not flag applications applied within 14 days', () => {
     const recent = new Date();
     recent.setDate(recent.getDate() - 5);
-    const apps = [{ dateApplied: recent.toISOString() }];
-    expect(getStaleApps(apps)).toHaveLength(0);
+    expect(getStaleApps([{ dateApplied: recent.toISOString() }])).toHaveLength(0);
   });
 
   it('returns empty array when no applications provided', () => {

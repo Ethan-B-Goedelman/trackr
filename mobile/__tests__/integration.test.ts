@@ -4,7 +4,6 @@
  */
 
 // ─── Contact Map Builder ──────────────────────────────────────────────────────
-// Replicates the logic in ApplicationsScreen.tsx that links contacts to apps
 
 function buildContactMap(contacts: { name: string; application?: any }[]): Record<string, string> {
   const map: Record<string, string> = {};
@@ -19,19 +18,16 @@ function buildContactMap(contacts: { name: string; application?: any }[]): Recor
 describe('Contact Map Builder', () => {
   it('correctly maps a contact linked by string application ID', () => {
     const contacts = [{ name: 'Sarah Connor', application: 'app001' }];
-    const map = buildContactMap(contacts);
-    expect(map['app001']).toBe('Sarah Connor');
+    expect(buildContactMap(contacts)['app001']).toBe('Sarah Connor');
   });
 
   it('correctly maps a contact linked by a populated application object', () => {
     const contacts = [{ name: 'John Smith', application: { _id: 'app002', company: 'Google' } }];
-    const map = buildContactMap(contacts);
-    expect(map['app002']).toBe('John Smith');
+    expect(buildContactMap(contacts)['app002']).toBe('John Smith');
   });
 
   it('skips contacts with no linked application', () => {
-    const contacts = [{ name: 'Ghost Contact', application: undefined }];
-    expect(Object.keys(buildContactMap(contacts))).toHaveLength(0);
+    expect(Object.keys(buildContactMap([{ name: 'Ghost', application: undefined }]))).toHaveLength(0);
   });
 
   it('builds a map with multiple contacts correctly', () => {
@@ -47,7 +43,6 @@ describe('Contact Map Builder', () => {
 });
 
 // ─── Interview Set Builder ────────────────────────────────────────────────────
-// Replicates the logic that determines which applications have interviews
 
 function buildInterviewSet(interviews: { application?: any }[]): Set<string> {
   const set = new Set<string>();
@@ -61,38 +56,30 @@ function buildInterviewSet(interviews: { application?: any }[]): Set<string> {
 
 describe('Interview Set Builder', () => {
   it('adds application ID from a string reference', () => {
-    const set = buildInterviewSet([{ application: 'app1' }]);
-    expect(set.has('app1')).toBe(true);
+    expect(buildInterviewSet([{ application: 'app1' }]).has('app1')).toBe(true);
   });
 
   it('adds application ID from a populated application object', () => {
-    const set = buildInterviewSet([{ application: { _id: 'app2', company: 'Apple' } }]);
-    expect(set.has('app2')).toBe(true);
+    expect(buildInterviewSet([{ application: { _id: 'app2', company: 'Apple' } }]).has('app2')).toBe(true);
   });
 
   it('returns an empty set when no interviews have linked applications', () => {
-    const set = buildInterviewSet([{ application: null }, {}]);
-    expect(set.size).toBe(0);
+    expect(buildInterviewSet([{ application: null }, {}]).size).toBe(0);
   });
 
   it('does not duplicate application IDs across multiple interviews', () => {
-    const interviews = [
+    const set = buildInterviewSet([
       { application: 'app1' },
       { application: 'app1' },
       { application: 'app2' },
-    ];
-    const set = buildInterviewSet(interviews);
+    ]);
     expect(set.size).toBe(2);
   });
 });
 
 // ─── Stale Application Filter ─────────────────────────────────────────────────
-// Replicates the 14-day follow-up reminder logic from DashboardScreen.tsx
 
-function filterStaleApps(
-  apps: { dateApplied?: string }[],
-  daysThreshold = 14
-): { dateApplied?: string }[] {
+function filterStaleApps(apps: { dateApplied?: string }[], daysThreshold = 14) {
   const cutoff = new Date();
   cutoff.setDate(cutoff.getDate() - daysThreshold);
   return apps.filter((a) => a.dateApplied && new Date(a.dateApplied) < cutoff);

@@ -6,7 +6,6 @@
 import { describe, it, expect } from 'vitest';
 
 // ─── Contact Map Builder ──────────────────────────────────────────────────────
-// Replicates the logic in Applications.tsx that builds applicationId → contact name
 
 function buildContactMap(contacts: { name: string; application?: any }[]): Record<string, string> {
   const map: Record<string, string> = {};
@@ -21,20 +20,16 @@ function buildContactMap(contacts: { name: string; application?: any }[]): Recor
 describe('Contact Map Builder', () => {
   it('maps a contact with a string application ID', () => {
     const contacts = [{ name: 'Jane Smith', application: 'app123' }];
-    const map = buildContactMap(contacts);
-    expect(map['app123']).toBe('Jane Smith');
+    expect(buildContactMap(contacts)['app123']).toBe('Jane Smith');
   });
 
   it('maps a contact with a populated application object', () => {
     const contacts = [{ name: 'John Doe', application: { _id: 'app456', company: 'Acme' } }];
-    const map = buildContactMap(contacts);
-    expect(map['app456']).toBe('John Doe');
+    expect(buildContactMap(contacts)['app456']).toBe('John Doe');
   });
 
   it('ignores contacts with no linked application', () => {
-    const contacts = [{ name: 'No App Contact' }];
-    const map = buildContactMap(contacts);
-    expect(Object.keys(map)).toHaveLength(0);
+    expect(Object.keys(buildContactMap([{ name: 'No App' }]))).toHaveLength(0);
   });
 
   it('handles multiple contacts correctly', () => {
@@ -51,7 +46,6 @@ describe('Contact Map Builder', () => {
 });
 
 // ─── Interview Set Builder ────────────────────────────────────────────────────
-// Replicates the logic that builds the set of applicationIds with interviews
 
 function buildInterviewSet(interviews: { application?: any }[]): Set<string> {
   const set = new Set<string>();
@@ -64,38 +58,32 @@ function buildInterviewSet(interviews: { application?: any }[]): Set<string> {
 }
 
 describe('Interview Set Builder', () => {
-  it('adds application IDs from interviews with string references', () => {
-    const interviews = [{ application: 'app1' }, { application: 'app2' }];
-    const set = buildInterviewSet(interviews);
+  it('adds application IDs from string references', () => {
+    const set = buildInterviewSet([{ application: 'app1' }, { application: 'app2' }]);
     expect(set.has('app1')).toBe(true);
     expect(set.has('app2')).toBe(true);
   });
 
   it('adds application IDs from populated application objects', () => {
-    const interviews = [{ application: { _id: 'app3', company: 'Acme' } }];
-    const set = buildInterviewSet(interviews);
+    const set = buildInterviewSet([{ application: { _id: 'app3', company: 'Acme' } }]);
     expect(set.has('app3')).toBe(true);
   });
 
   it('ignores interviews with no linked application', () => {
-    const interviews = [{ application: null }, {}];
-    const set = buildInterviewSet(interviews);
-    expect(set.size).toBe(0);
+    expect(buildInterviewSet([{ application: null }, {}]).size).toBe(0);
   });
 
   it('deduplicates multiple interviews for the same application', () => {
-    const interviews = [
+    const set = buildInterviewSet([
       { application: 'app1' },
       { application: 'app1' },
       { application: 'app1' },
-    ];
-    const set = buildInterviewSet(interviews);
+    ]);
     expect(set.size).toBe(1);
   });
 });
 
 // ─── Pagination ───────────────────────────────────────────────────────────────
-// Tests the pagination calculation used in ApplicationTable
 
 function getTotalPages(total: number, limit: number): number {
   return Math.ceil(total / limit);
