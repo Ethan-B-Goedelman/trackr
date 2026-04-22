@@ -15,7 +15,10 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.ethangoedelman.trackr",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoads": true
+        }
       }
     },
     "android": {
