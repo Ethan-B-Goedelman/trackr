@@ -1,0 +1,259 @@
+classDiagram
+
+%% ─── Data Models ─────────────────────────────────────────────────────────────
+
+class User {
+  +String _id
+  +String firstName
+  +String lastName
+  +String email
+  +Boolean isVerified
+}
+
+class Application {
+  +String _id
+  +String company
+  +String role
+  +ApplicationStatus status
+  +String? location
+  +Number? salaryMin
+  +Number? salaryMax
+  +String? jobUrl
+  +String? dateApplied
+  +String? notes
+}
+
+class ApplicationStatus {
+  <<enumeration>>
+  Applied
+  PhoneScreen
+  Technical
+  Onsite
+  Offer
+  Accepted
+  Rejected
+}
+
+class ApplicationRef {
+  +String _id
+  +String company
+  +String role
+}
+
+class Interview {
+  +String _id
+  +ApplicationRef? application
+  +String scheduledAt
+  +InterviewType type
+  +String? interviewerName
+  +String? interviewerRole
+  +String? location
+  +String? prepNotes
+  +String? reflection
+  +Number? rating
+}
+
+class InterviewType {
+  <<enumeration>>
+  Phone
+  Video
+  Technical
+  Onsite
+  Behavioral
+  Other
+}
+
+class Contact {
+  +String _id
+  +String name
+  +String? email
+  +String? phone
+  +String? company
+  +String? role
+  +String? linkedIn
+  +String? notes
+  +ApplicationRef? application
+}
+
+%% ─── Service ──────────────────────────────────────────────────────────────────
+
+class ApiService {
+  <<service>>
+  -String BASE_URL
+  -AxiosInstance axiosInstance
+  +get(endpoint) Promise
+  +post(endpoint, data) Promise
+  +put(endpoint, data) Promise
+  +delete(endpoint) Promise
+  +setUnauthorizedCallback(fn) void
+  +clearUnauthorizedCallback() void
+}
+
+%% ─── Context ──────────────────────────────────────────────────────────────────
+
+class AuthContext {
+  <<context>>
+  +User? user
+  +Boolean loading
+  +login(email, password) Promise~User~
+  +logout() void
+}
+
+%% ─── Navigation ───────────────────────────────────────────────────────────────
+
+class AppNavigator {
+  <<navigator>>
+  +renderStack() JSX
+}
+
+%% ─── Screens ──────────────────────────────────────────────────────────────────
+
+class LoginScreen {
+  -String email
+  -String password
+  -Boolean loading
+  +handleLogin() void
+}
+
+class DashboardScreen {
+  -Application[] applications
+  -Interview? nextInterview
+  -Application[] staleApps
+  -Record pipelineCounts
+  +fetchData() void
+}
+
+class ApplicationsScreen {
+  -Application[] applications
+  -Record~string,string~ contactMap
+  -Set~string~ interviewSet
+  +fetchData() void
+  +handleDelete(id) void
+}
+
+class InterviewsScreen {
+  -Interview[] interviews
+  +fetchData() void
+  +handleDelete(id) void
+}
+
+class ContactsScreen {
+  -Contact[] contacts
+  +fetchData() void
+  +handleDelete(id) void
+}
+
+class ProfileScreen {
+  +handleLogout() void
+}
+
+class AddApplicationScreen {
+  -String company
+  -String role
+  -ApplicationStatus status
+  -String? location
+  +handleSubmit() void
+}
+
+class EditApplicationScreen {
+  -Application application
+  +handleSubmit() void
+  +handleDelete() void
+}
+
+class AddInterviewScreen {
+  -String applicationId
+  -InterviewType type
+  -String scheduledAt
+  +handleSubmit() void
+}
+
+class EditInterviewScreen {
+  -Interview interview
+  +handleSubmit() void
+  +handleDelete() void
+}
+
+class AddContactScreen {
+  -String name
+  -String? email
+  -String? applicationId
+  +handleSubmit() void
+}
+
+class EditContactScreen {
+  -Contact contact
+  +handleSubmit() void
+  +handleDelete() void
+}
+
+%% ─── Components ───────────────────────────────────────────────────────────────
+
+class ApplicationCard {
+  +Application application
+  +Boolean hasInterview
+  +String? contactName
+  +Function onPress
+}
+
+class InterviewCard {
+  +Interview interview
+  +Function onPress
+}
+
+class ContactCard {
+  +Contact contact
+  +Function onPress
+}
+
+class PickerModal {
+  +String[] options
+  +String value
+  +Boolean visible
+  +Function onChange
+  +Function onClose
+}
+
+%% ─── Relationships ────────────────────────────────────────────────────────────
+
+Application --> ApplicationStatus : status
+Interview --> InterviewType : type
+Interview --> ApplicationRef : application
+Contact --> ApplicationRef : application
+
+AuthContext --> User : manages
+AuthContext --> ApiService : uses
+
+AppNavigator --> AuthContext : reads auth state
+AppNavigator --> LoginScreen : unauthenticated route
+AppNavigator --> DashboardScreen : tab
+AppNavigator --> ApplicationsScreen : tab
+AppNavigator --> InterviewsScreen : tab
+AppNavigator --> ContactsScreen : tab
+AppNavigator --> ProfileScreen : tab
+AppNavigator --> AddApplicationScreen : modal
+AppNavigator --> EditApplicationScreen : modal
+AppNavigator --> AddInterviewScreen : modal
+AppNavigator --> EditInterviewScreen : modal
+AppNavigator --> AddContactScreen : modal
+AppNavigator --> EditContactScreen : modal
+
+DashboardScreen --> ApiService : fetches applications\n+ interviews
+ApplicationsScreen --> ApiService : fetches applications\n+ contacts + interviews
+ApplicationsScreen --> ApplicationCard : renders list
+InterviewsScreen --> ApiService : fetches interviews
+InterviewsScreen --> InterviewCard : renders list
+ContactsScreen --> ApiService : fetches contacts
+ContactsScreen --> ContactCard : renders list
+ProfileScreen --> AuthContext : calls logout()
+
+AddApplicationScreen --> ApiService : POST /applications
+AddApplicationScreen --> PickerModal : status picker
+EditApplicationScreen --> ApiService : PUT / DELETE
+EditApplicationScreen --> PickerModal : status picker
+AddInterviewScreen --> ApiService : POST /interviews
+AddInterviewScreen --> PickerModal : type picker
+EditInterviewScreen --> ApiService : PUT / DELETE
+EditInterviewScreen --> PickerModal : type picker
+AddContactScreen --> ApiService : POST /contacts
+EditContactScreen --> ApiService : PUT / DELETE
