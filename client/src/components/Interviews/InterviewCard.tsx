@@ -10,14 +10,6 @@ const TYPE_COLORS = {
   Other:      { bg: 'bg-gray-100',   text: 'text-gray-500' },
 };
 
-const TYPE_ICONS = {
-  Phone:      '📞',
-  Video:      '🎥',
-  Technical:  '💻',
-  Onsite:     '🏢',
-  Behavioral: '🧠',
-  Other:      '📋',
-};
 
 export default function InterviewCard({ interview, onEdit, onDelete }) {
   const { application, scheduledAt, type, interviewerName, interviewerRole, location, rating } = interview;
@@ -29,8 +21,7 @@ export default function InterviewCard({ interview, onEdit, onDelete }) {
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap mb-1.5">
-            <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold ${colors.bg} ${colors.text}`}>
-              <span>{TYPE_ICONS[type] ?? '📋'}</span>
+            <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${colors.bg} ${colors.text}`}>
               {type}
             </span>
             {isPast && (

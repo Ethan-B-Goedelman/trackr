@@ -139,8 +139,9 @@ export default function Contacts() {
     setFormError('');
     try {
       if (editingContact) {
-        const res = await api.put(`/contacts/${editingContact._id}`, data);
-        setContacts((prev) => prev.map((c) => c._id === editingContact._id ? res.data.contact : c));
+        await api.put(`/contacts/${editingContact._id}`, data);
+        // Re-fetch so the application field comes back fully populated
+        await fetchContacts(pagination.page);
       } else {
         const res = await api.post('/contacts', data);
         setContacts((prev) => [res.data.contact, ...prev]);

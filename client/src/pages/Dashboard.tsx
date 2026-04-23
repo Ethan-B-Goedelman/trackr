@@ -140,7 +140,7 @@ export default function Dashboard() {
       <div className="pt-1 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-gray-800">
-            {greeting}{firstName ? `, ${firstName}` : ''} 👋
+            {greeting}{firstName ? `, ${firstName}` : ''}
           </h1>
           <p className="text-gray-400 text-xs mt-0.5">Here's your application progress</p>
         </div>

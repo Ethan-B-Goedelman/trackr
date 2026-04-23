@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
   DndContext, DragOverlay, closestCorners,
-  useSensor, useSensors, PointerSensor,
+  useSensor, useSensors, PointerSensor, useDroppable,
 } from '@dnd-kit/core';
 import { snapCenterToCursor } from '@dnd-kit/modifiers';
 import {
@@ -41,6 +41,7 @@ function SortableCard({ application, onEdit, onDelete, contactMap, interviewSet 
 }
 
 function Column({ status, applications, onEdit, onDelete, contactMap, interviewSet }) {
+  const { setNodeRef } = useDroppable({ id: status });
   return (
     <div className="flex-shrink-0 w-64">
       <div className={`${COLUMN_STYLES[status] ?? 'bg-gray-50/60 border-gray-100'} border rounded-3xl p-3 min-h-[400px]`}>
@@ -51,7 +52,7 @@ function Column({ status, applications, onEdit, onDelete, contactMap, interviewS
           </span>
         </div>
         <SortableContext items={applications.map((a) => a._id)} strategy={verticalListSortingStrategy}>
-          <div className="space-y-2">
+          <div ref={setNodeRef} className="space-y-2 min-h-[300px]">
             {applications.map((app) => (
               <SortableCard
                 key={app._id}
